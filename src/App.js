@@ -603,15 +603,18 @@ async function submitReject(){
 
   const cntAllExt=extReqs.length, cntPendingExt=extReqs.filter(r=>r.status==="pending").length, cntApprovedExt=extReqs.filter(r=>r.status==="approved").length;
 
+ const cntRejectedExt=extReqs.filter(r=>r.status==="rejected").length;
   const EXT_TABS_ADMIN=[
-    {key:"all",    icon:"📬", label:"전체",  count:cntAllExt,     color:"#5B6EEA", activeBg:"rgba(91,110,234,.15)"},
-    {key:"pending",icon:"⏳", label:"검토중", count:cntPendingExt, color:"#F5A623", activeBg:"rgba(245,166,35,.15)"},
-    {key:"approved",icon:"✅",label:"승인됨", count:cntApprovedExt,color:"#27AE60", activeBg:"rgba(39,174,96,.15)"},
+    {key:"all",    icon:"📬", label:"전체",  count:cntAllExt,      color:"#5B6EEA", activeBg:"rgba(91,110,234,.15)"},
+    {key:"pending",icon:"⏳", label:"검토중", count:cntPendingExt,  color:"#F5A623", activeBg:"rgba(245,166,35,.15)"},
+    {key:"approved",icon:"✅",label:"승인됨", count:cntApprovedExt, color:"#27AE60", activeBg:"rgba(39,174,96,.15)"},
+    {key:"rejected",icon:"❌",label:"반려됨", count:cntRejectedExt, color:"#E84545", activeBg:"rgba(232,69,69,.15)"},
   ];
-  const filteredExtReqs=extReqs.slice().reverse().filter(r=>{
+const filteredExtReqs=extReqs.slice().reverse().filter(r=>{
     if(extPanel==="all")return true;
     if(extPanel==="pending")return r.status==="pending";
     if(extPanel==="approved")return r.status==="approved";
+    if(extPanel==="rejected")return r.status==="rejected";
     return false;
   });
 
@@ -1037,10 +1040,11 @@ function AdminDashboard({onBack}){
   const extAll=allExtReqs.length, extPending=allExtReqs.filter(r=>r.status==="pending").length, extApproved=allExtReqs.filter(r=>r.status==="approved").length;
 
   // ext panel filtered list — group by employee
-  const filteredExt=allExtReqs.filter(r=>{
+const filteredExt=allExtReqs.filter(r=>{
     if(extPanel==="all")return true;
     if(extPanel==="pending")return r.status==="pending";
     if(extPanel==="approved")return r.status==="approved";
+    if(extPanel==="rejected")return r.status==="rejected";
     return false;
   });
   // group by empName for display

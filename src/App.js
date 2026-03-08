@@ -439,7 +439,8 @@ function AdminDetail({employee:initEmp,checks:initChecks,tpl:initTpl,onBack}){
   const [deleteConfirm,setDeleteConfirm]=useState(null);
   // ext panel: null | "all" | "pending" | "approved"
   const [extPanel,setExtPanel]=useState(null);
-
+const [rejectModal,setRejectModal]=useState(null);
+const [rejectReason,setRejectReason]=useState("");
   useEffect(()=>{
     Promise.all([load(`item_overrides_${emp.id}`,true),load(`item_notes_${emp.id}`,true),load(`ext_requests_${emp.id}`,true)])
       .then(([ov,n,er])=>{setItemOverrides(ov||{});setNotes(n||{});setExtReqs(er||[]);});

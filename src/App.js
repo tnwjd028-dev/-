@@ -196,16 +196,19 @@ function UserChecklist({employee,onBack}){
 
   if(loading)return <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Pretendard',sans-serif"}}>불러오는 중...</div>;
 
+ const cntRejected=extReqs.filter(r=>r.status==="rejected").length;
   const EXT_TABS=[
     {key:"all",    icon:"📬", label:"전체",  count:cntAll,    color:"#5B6EEA", activeBg:"rgba(91,110,234,.22)"},
     {key:"pending",icon:"⏳", label:"검토중", count:cntPending,color:"#F5A623", activeBg:"rgba(245,166,35,.22)"},
     {key:"approved",icon:"✅",label:"승인됨", count:cntApproved,color:"#27AE60",activeBg:"rgba(39,174,96,.22)"},
+    {key:"rejected",icon:"❌",label:"반려됨", count:cntRejected,color:"#E84545",activeBg:"rgba(232,69,69,.22)"},
   ];
 
   const filteredReqs = extReqs.slice().reverse().filter(r=>{
     if(extPanel==="all")return true;
     if(extPanel==="pending")return r.status==="pending";
     if(extPanel==="approved")return r.status==="approved";
+    if(extPanel==="rejected")return r.status==="rejected";
     return false;
   });
 

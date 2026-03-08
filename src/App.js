@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 const DEFAULT_TEMPLATE = [
   { id:"cat_1", category:"입사 당일", dueDays:0, color:"#E84545",
@@ -23,7 +23,7 @@ const calcProgress = (checks,tpl) => { const all=(tpl||[]).flatMap(c=>c.items); 
 const getEffDue = (itemId,catDueDays,ov) => ov?.[itemId]??catDueDays;
 const isOverdue = (joinDate,dueDays,checked) => !checked && daysBetween(joinDate)>dueDays;
 const fmtDT = iso => { if(!iso)return""; const d=new Date(iso); return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,"0")}.${String(d.getDate()).padStart(2,"0")} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`; };
-const deepEqual = (a,b) => JSON.stringify(a)===JSON.stringify(b);
+
 
 function toast(msg,type="info"){
   const C={info:"#2E86DE",success:"#27AE60",warning:"#F5A623",error:"#E84545"};
@@ -162,7 +162,7 @@ function UserChecklist({employee,onBack}){
     ]).then(([c,t,ov,n,er])=>{
       setChecks(c||{}); setTpl(t||DEFAULT_TEMPLATE); setItemOverrides(ov||{}); setNotes(n||{}); setExtReqs(er||[]); setLoading(false);
     });
-  },[]);
+  }, [employee.id]);
 
   async function toggle(id){
     const next={...checks,[id]:!checks[id]};
@@ -437,7 +437,7 @@ function AdminDetail({employee:initEmp,checks:initChecks,tpl:initTpl,onBack}){
   useEffect(()=>{
     Promise.all([load(`item_overrides_${emp.id}`,true),load(`item_notes_${emp.id}`,true),load(`ext_requests_${emp.id}`,true)])
       .then(([ov,n,er])=>{setItemOverrides(ov||{});setNotes(n||{});setExtReqs(er||[]);});
-  },[]);
+  }, [emp.id]);
 
   // Auto-save helpers — persist immediately on every change
   async function updTpl(next){setTpl(next);await save("checklist_template",next,true);toast("자동 저장되었습니다.","success");}
@@ -940,7 +940,7 @@ function AdminDashboard({onBack}){
     setChecksMap(map); setLoading(false);
   },[]);
 
-  useEffect(()=>{reload();},[]);
+  useEffect(()=>{reload();}, [reload]);
 
   async function addEmployee(){
     if(!form.name||!form.department||!form.position||!form.joinDate){toast("모든 필수 항목을 입력해주세요.","warning");return;}

@@ -153,8 +153,6 @@ function UserChecklist({employee,onBack}){
   const [extReason,setExtReason]=useState("");
   // Panel state: null = closed, "all" | "pending" | "approved" = open with filter
   const [extPanel,setExtPanel]=useState(null);
-const [rejectModal,setRejectModal]=useState(null);
-const [rejectReason,setRejectReason]=useState("");
   useEffect(()=>{
     Promise.all([
       load(`checks_${employee.id}`,true), load("checklist_template",true),

@@ -153,7 +153,8 @@ function UserChecklist({employee,onBack}){
   const [extReason,setExtReason]=useState("");
   // Panel state: null = closed, "all" | "pending" | "approved" = open with filter
   const [extPanel,setExtPanel]=useState(null);
-
+const [rejectModal,setRejectModal]=useState(null);
+const [rejectReason,setRejectReason]=useState("");
   useEffect(()=>{
     Promise.all([
       load(`checks_${employee.id}`,true), load("checklist_template",true),
@@ -279,6 +280,11 @@ function UserChecklist({employee,onBack}){
                 <Badge text={si[0]} color={si[1]}/>
                 <span style={{fontWeight:700,fontSize:13,color:"#1a2233",flex:1}}>{r.itemLabel}</span>
                 {r.status==="approved"&&<Badge text={`D+${r.currentDue+r.requestDays} (연장 확정)`} color="#27AE60"/>}
+                {r.status==="rejected"&&r.rejectReason&&(
+  <div style={{fontSize:12,color:"#E84545",marginTop:4,background:"#fff0f0",borderRadius:7,padding:"6px 10px"}}>
+    💬 반려 사유: {r.rejectReason}
+  </div>
+)}
               </div>
               <div style={{fontSize:12,color:"#8899bb",marginTop:6}}>요청: D+{r.currentDue} → D+{r.currentDue+r.requestDays} ({r.requestDays}일 연장)</div>
               <div style={{fontSize:12,color:"#6b7a99",marginTop:3,fontStyle:"italic"}}>사유: {r.reason}</div>
@@ -564,16 +570,30 @@ function AdminDetail({employee:initEmp,checks:initChecks,tpl:initTpl,onBack}){
   function handleExtTabClick(key){setExtPanel(p=>p===key?null:key);}
 
   async function handleExtReq(reqId,action){
-    const up=extReqs.map(r=>r.id===reqId?{...r,status:action,reviewedAt:new Date().toISOString()}:r);
-    setExtReqs(up); await save(`ext_requests_${emp.id}`,up,true);
-    const gl=(await load("ext_requests_all",true))||[];
-    await save("ext_requests_all",gl.map(r=>r.id===reqId?{...r,status:action}:r),true);
-    if(action==="approved"){
-      const req=extReqs.find(r=>r.id===reqId);
-      if(req)updOv({...itemOverrides,[req.itemId]:req.currentDue+req.requestDays});
-      toast("기한 연장이 승인되었습니다.","success");
-    } else {toast("기한 연장이 반려되었습니다.","warning");}
+  if(action==="rejected"){
+    setRejectModal({reqId}); return;
   }
+  const up=extReqs.map(r=>r.id===reqId?{...r,status:action,reviewedAt:new Date().toISOString()}:r);
+  setExtReqs(up); await save(`ext_requests_${emp.id}`,up,true);
+  const gl=(await load("ext_requests_all",true))||[];
+  await save("ext_requests_all",gl.map(r=>r.id===reqId?{...r,status:action}:r),true);
+  if(action==="approved"){
+    const req=extReqs.find(r=>r.id===reqId);
+    if(req)updOv({...itemOverrides,[req.itemId]:req.currentDue+req.requestDays});
+    toast("기한 연장이 승인되었습니다.","success");
+  }
+}
+
+async function submitReject(){
+  if(!rejectReason.trim()){toast("반려 사유를 입력해주세요.","warning");return;}
+  const reqId=rejectModal.reqId;
+  const up=extReqs.map(r=>r.id===reqId?{...r,status:"rejected",rejectReason:rejectReason.trim(),reviewedAt:new Date().toISOString()}:r);
+  setExtReqs(up); await save(`ext_requests_${emp.id}`,up,true);
+  const gl=(await load("ext_requests_all",true))||[];
+  await save("ext_requests_all",gl.map(r=>r.id===reqId?{...r,status:"rejected",rejectReason:rejectReason.trim(),reviewedAt:new Date().toISOString()}:r),true);
+  toast("기한 연장이 반려되었습니다.","warning");
+  setRejectModal(null); setRejectReason("");
+}
 
   const {done,total,pct}=calcProgress(checks,tpl);
   const elapsed=daysBetween(emp.joinDate);
@@ -906,6 +926,21 @@ function AdminDetail({employee:initEmp,checks:initChecks,tpl:initTpl,onBack}){
         <div style={{display:"flex",gap:10,marginTop:4}}><PBtn onClick={saveNote} color="#F5A623" style={{flex:1}}>💬 저장</PBtn><OBtn onClick={()=>{setNoteModal(null);setNoteText("");}} style={{flex:1}}>취소</OBtn></div>
       </Modal>
     )}
+    {rejectModal&&(
+  <Modal title="❌ 반려 사유 입력" onClose={()=>{setRejectModal(null);setRejectReason("");}} titleColor="#E84545">
+    <div style={{background:"#fff0f0",border:"1px solid #E8454530",borderRadius:8,padding:"9px 13px",fontSize:12,color:"#E84545",marginBottom:14}}>
+      ⚠️ 반려 사유는 신규입사자 화면에 즉시 표시됩니다.
+    </div>
+    <Field label="반려 사유 (필수)">
+      <textarea value={rejectReason} onChange={e=>setRejectReason(e.target.value)} placeholder="반려 사유를 상세히 입력해주세요." autoFocus
+        style={{width:"100%",height:110,padding:"10px 13px",borderRadius:9,border:"1.5px solid #e2e8f0",fontSize:13,outline:"none",boxSizing:"border-box",resize:"vertical",fontFamily:"inherit",lineHeight:1.6}}/>
+    </Field>
+    <div style={{display:"flex",gap:10,marginTop:4}}>
+      <PBtn onClick={submitReject} color="#E84545" style={{flex:1}}>❌ 반려 확정</PBtn>
+      <OBtn onClick={()=>{setRejectModal(null);setRejectReason("");}} style={{flex:1}}>취소</OBtn>
+    </div>
+  </Modal>
+)}
   </div>);
 }
 

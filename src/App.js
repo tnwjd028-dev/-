@@ -1,4 +1,26 @@
 import { useState, useEffect, useCallback } from "react";
+import emailjs from "@emailjs/browser";
+
+// ── EmailJS 설정 ──────────────────────────────────────────
+// EmailJS 가입 후 아래 값을 본인 계정 정보로 교체하세요
+const EJS_SERVICE  = "service_5b1skl5";
+const EJS_TEMPLATE = "template_1cw68sm";
+const EJS_PUBLIC   = "GtagXiJ0WuIWlvJue";
+const NOTIFY_TO    = "insa@bimatrix.co.kr";
+
+async function sendEmail(subject, body, toName=""){
+  try{
+    await emailjs.send(EJS_SERVICE, EJS_TEMPLATE,
+      {to_email:NOTIFY_TO, to_name:"인사기획팀", subject, body, email:NOTIFY_TO},
+      {publicKey: EJS_PUBLIC}
+    );
+    return true;
+  } catch(e){
+    console.error("EmailJS error:",e);
+    return false;
+  }
+}
+// ──────────────────────────────────────────────────────────
 
 const DEFAULT_TEMPLATE = [
   { id:"cat_1", category:"입사 2주 전", dueDays:-14, color:"#9B59B6",
@@ -872,17 +894,21 @@ const [rejectReason,setRejectReason]=useState("");
     setMailBody(`안녕하세요, ${emp.name}님.\n\n다음 온보딩 항목이 아직 완료되지 않았습니다.\n\n▶ ${item.label}\n   (제출기한: 입사 후 ${effDue}일 이내)\n\n빠른 시일 내에 완료해주시기 바랍니다.\n\n인사팀 드림`);
     setMailModal({item,cat});
   }
-  function sendItemMail(){window.open(`mailto:${emp.email||""}?subject=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`);toast("메일 클라이언트가 열렸습니다.","success");setMailModal(null);}
-  function sendAllMail(){
+  async function sendItemMail(){
+    const ok=await sendEmail(mailSubject,mailBody);
+    toast(ok?"✉️ 알림 메일이 발송되었습니다.":"메일 발송 실패. EmailJS 설정을 확인하세요.",ok?"success":"error");
+    setMailModal(null);
+  }
+  async function sendAllMail(){
     const over=[];
     tpl.forEach(cat=>cat.items.forEach(item=>{
       const effDue=getEffDue(item.id,cat.dueDays,itemOverrides);
       if(!checks[item.id]&&isOverdue(emp.joinDate,effDue,false))over.push(item.label);
     }));
     if(!over.length){toast("기한 초과된 미완료 항목이 없습니다.","info");return;}
-    const body=`안녕하세요, ${emp.name}님.\n\n다음 항목들이 기한 내에 완료되지 않았습니다:\n\n${over.map(l=>`• ${l}`).join("\n")}\n\n인사팀 드림`;
-    window.open(`mailto:${emp.email||""}?subject=${encodeURIComponent(`[온보딩 알림] ${emp.name}님 미완료 항목 안내`)}&body=${encodeURIComponent(body)}`);
-    toast(`${over.length}개 미완료 항목 알림 발송`,"success");
+    const body=`안녕하세요.\n\n${emp.name}님(${emp.department} / ${emp.position})의 다음 항목들이 기한 내에 완료되지 않았습니다:\n\n${over.map(l=>`• ${l}`).join("\n")}\n\n인사팀 드림`;
+    const ok=await sendEmail(`[온보딩 알림] ${emp.name}님 미완료 항목 안내`,body);
+    toast(ok?`${over.length}개 미완료 항목 알림 발송 완료`:"메일 발송 실패. EmailJS 설정을 확인하세요.",ok?"success":"error");
   }
 
   function openNoteFromToolbar(){
@@ -1373,9 +1399,10 @@ function OffboardingDetail({employee, checks:initChecks, tpl:initTpl, onBack, is
     setMailModal(item);
   }
 
-  function sendMail(){
-    window.open(`mailto:${employee.email||""}?subject=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`);
-    setMailModal(null); toast("메일 앱이 열렸습니다.","success");
+  async function sendMail(){
+    const ok=await sendEmail(mailSubject,mailBody);
+    toast(ok?"✉️ 알림 메일이 발송되었습니다.":"메일 발송 실패. EmailJS 설정을 확인하세요.",ok?"success":"error");
+    setMailModal(null);
   }
 
   async function saveNote(){
@@ -1762,13 +1789,13 @@ function AdminDashboard({onBack}){
     toast(`${editEmpForm.name}님 정보가 수정되었습니다.`,"success"); reload();
   }
 
-  function sendReminder(emp){
+  async function sendReminder(emp){
     const ch=checksMap[emp.id]||[]; const over=[];
     tpl.forEach(cat=>cat.items.forEach(item=>{if(!ch[item.id]&&isOverdue(emp.joinDate,cat.dueDays,false))over.push(item.label);}));
     if(!over.length){toast("미수행 기한 초과 항목이 없습니다.","info");return;}
-    const body=`안녕하세요, ${emp.name}님.\n\n다음 항목들이 기한 내에 완료되지 않았습니다:\n\n${over.map(l=>`• ${l}`).join("\n")}\n\n인사팀 드림`;
-    window.open(`mailto:${emp.email||""}?subject=${encodeURIComponent(`[온보딩 알림] ${emp.name}님 미완료 항목 안내`)}&body=${encodeURIComponent(body)}`);
-    toast(`${emp.name}님 알림 발송 (${over.length}개)`,"success");
+    const body=`안녕하세요.\n\n${emp.name}님(${emp.department} / ${emp.position})의 다음 항목들이 기한 내에 완료되지 않았습니다:\n\n${over.map(l=>`• ${l}`).join("\n")}\n\n인사팀 드림`;
+    const ok=await sendEmail(`[온보딩 알림] ${emp.name}님 미완료 항목 안내`,body);
+    toast(ok?`${emp.name}님 알림 발송 완료 (${over.length}개)`:"메일 발송 실패. EmailJS 설정을 확인하세요.",ok?"success":"error");
   }
 
   function handleRowClick(emp){

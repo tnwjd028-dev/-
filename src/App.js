@@ -56,6 +56,7 @@ const calcProgress = (checks,tpl) => { const all=(tpl||[]).flatMap(c=>c.items); 
 const getEffDue = (itemId,catDueDays,ov) => ov?.[itemId]??catDueDays;
 const isOverdue = (joinDate,dueDays,checked) => !checked && daysBetween(joinDate)>dueDays;
 const fmtD = v => v < 0 ? `D${v}` : `D+${v}`;
+const fmtDeadline = (baseDate, dueDays) => { const d=new Date(baseDate); d.setDate(d.getDate()+dueDays); return `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일`; };
 const fmtDT = iso => { if(!iso)return""; const d=new Date(iso); return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,"0")}.${String(d.getDate()).padStart(2,"0")} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`; };
 
 
@@ -891,7 +892,7 @@ const [rejectReason,setRejectReason]=useState("");
     const item=cat?.items.find(i=>i.id===selectedItem.itemId); if(!item||!cat)return;
     const effDue=getEffDue(item.id,cat.dueDays,itemOverrides);
     setMailSubject(`[온보딩 알림] ${emp.name}님 - "${item.label}" 미완료 안내`);
-    setMailBody(`안녕하세요, ${emp.name}님.\n\n다음 온보딩 항목이 아직 완료되지 않았습니다.\n\n▶ ${item.label}\n   (제출기한: 입사 후 ${effDue}일 이내)\n\n빠른 시일 내에 완료해주시기 바랍니다.\n\n인사팀 드림`);
+    setMailBody(`안녕하세요, ${emp.name}님.\n\n다음 온보딩 항목이 아직 완료되지 않았습니다.\n\n▶ ${item.label}\n   (제출 기한: ${fmtDeadline(emp.joinDate, effDue)}까지)\n\n기한 내에 완료해주시기 바랍니다.\n\n인사팀 드림`);
     setMailModal({item,cat});
   }
   async function sendItemMail(){
@@ -903,10 +904,10 @@ const [rejectReason,setRejectReason]=useState("");
     const over=[];
     tpl.forEach(cat=>cat.items.forEach(item=>{
       const effDue=getEffDue(item.id,cat.dueDays,itemOverrides);
-      if(!checks[item.id]&&isOverdue(emp.joinDate,effDue,false))over.push(item.label);
+      if(!checks[item.id]&&isOverdue(emp.joinDate,effDue,false))over.push({label:item.label,deadline:fmtDeadline(emp.joinDate,effDue)});
     }));
     if(!over.length){toast("기한 초과된 미완료 항목이 없습니다.","info");return;}
-    const body=`안녕하세요.\n\n${emp.name}님(${emp.department} / ${emp.position})의 다음 항목들이 기한 내에 완료되지 않았습니다:\n\n${over.map(l=>`• ${l}`).join("\n")}\n\n인사팀 드림`;
+    const body=`안녕하세요.\n\n${emp.name}님(${emp.department} / ${emp.position})의 다음 항목들이 기한 내에 완료되지 않았습니다:\n\n${over.map(o=>`• ${o.label}\n  → 제출 기한: ${o.deadline}까지`).join("\n\n")}\n\n기한 내에 완료해주시기 바랍니다.\n\n인사팀 드림`;
     const ok=await sendEmail(`[온보딩 알림] ${emp.name}님 미완료 항목 안내`,body);
     toast(ok?`${over.length}개 미완료 항목 알림 발송 완료`:"메일 발송 실패. EmailJS 설정을 확인하세요.",ok?"success":"error");
   }
@@ -1395,7 +1396,7 @@ function OffboardingDetail({employee, checks:initChecks, tpl:initTpl, onBack, is
   function openMail(item){
     const effDue=itemOverrides[item.id]??item.catDueDays;
     setMailSubject(`[퇴사 처리 알림] ${employee.name}님 - "${item.label}" 미완료 안내`);
-    setMailBody(`안녕하세요, ${employee.name}님.\n\n다음 퇴사 처리 항목이 아직 완료되지 않았습니다.\n\n▶ ${item.label}\n   (처리 기한: 퇴사 ${Math.abs(effDue)}일 전)\n\n빠른 시일 내에 완료해주시기 바랍니다.\n\n인사팀 드림`);
+    setMailBody(`안녕하세요, ${employee.name}님.\n\n다음 퇴사 처리 항목이 아직 완료되지 않았습니다.\n\n▶ ${item.label}\n   (처리 기한: ${fmtDeadline(employee.leaveDate, effDue)}까지)\n\n기한 내에 완료해주시기 바랍니다.\n\n인사팀 드림`);
     setMailModal(item);
   }
 
@@ -1791,9 +1792,9 @@ function AdminDashboard({onBack}){
 
   async function sendReminder(emp){
     const ch=checksMap[emp.id]||[]; const over=[];
-    tpl.forEach(cat=>cat.items.forEach(item=>{if(!ch[item.id]&&isOverdue(emp.joinDate,cat.dueDays,false))over.push(item.label);}));
+    tpl.forEach(cat=>cat.items.forEach(item=>{if(!ch[item.id]&&isOverdue(emp.joinDate,cat.dueDays,false))over.push({label:item.label,deadline:fmtDeadline(emp.joinDate,cat.dueDays)});}));
     if(!over.length){toast("미수행 기한 초과 항목이 없습니다.","info");return;}
-    const body=`안녕하세요.\n\n${emp.name}님(${emp.department} / ${emp.position})의 다음 항목들이 기한 내에 완료되지 않았습니다:\n\n${over.map(l=>`• ${l}`).join("\n")}\n\n인사팀 드림`;
+    const body=`안녕하세요.\n\n${emp.name}님(${emp.department} / ${emp.position})의 다음 항목들이 기한 내에 완료되지 않았습니다:\n\n${over.map(o=>`• ${o.label}\n  → 제출 기한: ${o.deadline}까지`).join("\n\n")}\n\n기한 내에 완료해주시기 바랍니다.\n\n인사팀 드림`;
     const ok=await sendEmail(`[온보딩 알림] ${emp.name}님 미완료 항목 안내`,body);
     toast(ok?`${emp.name}님 알림 발송 완료 (${over.length}개)`:"메일 발송 실패. EmailJS 설정을 확인하세요.",ok?"success":"error");
   }

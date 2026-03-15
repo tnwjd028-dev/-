@@ -144,7 +144,7 @@ function UserHome({onLogin}){
       const emp=emps.find(e=>e.name.trim()===name.trim()&&e.empId===empId.trim()&&e.joinDate===date);
       if(!emp){setErr("등록된 입사자 정보를 찾을 수 없습니다. 인사팀에 문의해주세요.");setLoading(false);return;}
       const survey=await load(`survey_on_${emp.id}`,true);
-      if(survey){
+      if(survey&&!survey.reloginApproved){
         // check if already has a pending request
         const allReqs=(await load("relogin_requests",true))||[];
         const hasPending=allReqs.some(r=>r.empId===emp.id&&r.status==="pending");
@@ -158,7 +158,7 @@ function UserHome({onLogin}){
       const emp=emps.find(e=>e.name.trim()===name.trim()&&e.empId===empId.trim()&&e.leaveDate===date);
       if(!emp){setErr("등록된 퇴사자 정보를 찾을 수 없습니다. 인사팀에 문의해주세요.");setLoading(false);return;}
       const survey=await load(`survey_off_${emp.id}`,true);
-      if(survey){
+      if(survey&&!survey.reloginApproved){
         const allReqs=(await load("relogin_requests",true))||[];
         const hasPending=allReqs.some(r=>r.empId===emp.id&&r.status==="pending");
         setBlockedEmp({...emp,offboarding:true,surveyKey:`survey_off_${emp.id}`});
@@ -316,6 +316,7 @@ function UserChecklist({employee,onBack}){
   const [extPanel,setExtPanel]=useState(null);
   const [showSurvey,setShowSurvey]=useState(false);
   const [surveyDone,setSurveyDone]=useState(false);
+  const [prevSurvey,setPrevSurvey]=useState(null);
   useEffect(()=>{
     Promise.all([
       load(`checks_${employee.id}`,true), load("checklist_template",true),
@@ -323,7 +324,8 @@ function UserChecklist({employee,onBack}){
       load(`ext_requests_${employee.id}`,true), load(`survey_on_${employee.id}`,true),
     ]).then(([c,t,ov,n,er,sv])=>{
       setChecks(c||{}); setTpl(t||DEFAULT_TEMPLATE); setItemOverrides(ov||{}); setNotes(n||{}); setExtReqs(er||[]);
-      if(sv)setSurveyDone(true);
+      if(sv&&!sv.reloginApproved)setSurveyDone(true);
+      if(sv)setPrevSurvey(sv);
       setLoading(false);
     });
   }, [employee.id]);
@@ -531,7 +533,7 @@ function UserChecklist({employee,onBack}){
       </div>)}
     </div>
 
-    {showSurvey&&<SurveyModal type="on" onClose={()=>setShowSurvey(false)} onSubmit={async(data)=>{
+    {showSurvey&&<SurveyModal type="on" initialData={prevSurvey} onClose={()=>setShowSurvey(false)} onSubmit={async(data)=>{
       await save(`survey_on_${employee.id}`,data,true);
       toast("설문 응답이 저장되었습니다. 감사합니다!","success");
       setTimeout(()=>onBack(),800);
@@ -597,12 +599,12 @@ function AdminLogin({onLogin,onBack}){
 // ─────────────────────────────────────────────────────────
 // SURVEY MODAL
 // ─────────────────────────────────────────────────────────
-function SurveyModal({onClose,onSubmit,type="on"}){
-  const [rating,setRating]=useState(0);
+function SurveyModal({onClose,onSubmit,type="on",initialData=null}){
+  const [rating,setRating]=useState(initialData?.rating||0);
   const [hov,setHov]=useState(0);
-  const [helpful,setHelpful]=useState("");
-  const [improve,setImprove]=useState("");
-  const [other,setOther]=useState("");
+  const [helpful,setHelpful]=useState(initialData?.helpful||"");
+  const [improve,setImprove]=useState(initialData?.improve||"");
+  const [other,setOther]=useState(initialData?.other||"");
   const labels=["","매우 불만족","불만족","보통","만족","매우 만족"];
   function submit(){
     if(!rating){toast("만족도 별점을 선택해주세요.","warning");return;}
@@ -1316,7 +1318,7 @@ function OffboardingDetail({employee, checks:initChecks, tpl:initTpl, onBack, is
       load(`survey_off_${employee.id}`,true),
     ]).then(([ov,n,er,sv])=>{
       setItemOverrides(ov||{}); setNotes(n||{}); setExtReqs(er||[]);
-      if(sv){setSurveyDone(true);setSurvey(sv);}
+      if(sv){if(!sv.reloginApproved)setSurveyDone(true);setSurvey(sv);}
     });
   },[employee.id]);
 
@@ -1573,7 +1575,7 @@ function OffboardingDetail({employee, checks:initChecks, tpl:initTpl, onBack, is
     </div>
 
     {/* MODALS */}
-    {showSurvey&&<SurveyModal type="off" onClose={()=>setShowSurvey(false)} onSubmit={async(data)=>{
+    {showSurvey&&<SurveyModal type="off" initialData={survey} onClose={()=>setShowSurvey(false)} onSubmit={async(data)=>{
       await save(`survey_off_${employee.id}`,data,true);
       toast("설문 응답이 저장되었습니다. 감사합니다!","success");
       setTimeout(()=>onBack(),800);
@@ -1798,8 +1800,9 @@ function AdminDashboard({onBack}){
   function handleExtTabClick(key){setExtPanel(p=>p===key?null:key);}
 
   async function approveRelogin(req){
-    // clear survey so user can log in again
-    await save(req.surveyKey,null,true);
+    // mark survey as reloginApproved so user can log in again but previous answers are preserved
+    const prev=await load(req.surveyKey,true);
+    await save(req.surveyKey,prev?{...prev,reloginApproved:true}:{reloginApproved:true},true);
     const next=reloginReqs.map(r=>r.id===req.id?{...r,status:"approved",resolvedAt:new Date().toISOString()}:r);
     await save("relogin_requests",next,true); setReloginReqs(next);
     toast(`${req.empName}님 재로그인 승인 완료`,"success");

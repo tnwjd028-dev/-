@@ -68,18 +68,34 @@ function toast(msg,type="info"){
   const s=document.createElement("style"); s.textContent=`@keyframes _t{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}`; document.head.appendChild(s); document.body.appendChild(el); setTimeout(()=>el.remove(),3200);
 }
 
-const load = async (k, _sh = false) => {
+const SUPABASE_URL  = 'https://hontxxomiezpikjgwayv.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvbnR4eG9taWV6cGlramd3YXl2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwODkzODgsImV4cCI6MjA5MzY2NTM4OH0.l6oiw0zbWvpQ7DeJZLAm1gjNWaojfhPYQKuc1sdo5Rg';
+
+const load = async (k) => {
   try {
-    const v = localStorage.getItem(k);
-    return v ? JSON.parse(v) : null;
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/kv_store?key=eq.${encodeURIComponent(k)}&select=value`,
+      { headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` } }
+    );
+    const data = await res.json();
+    return data?.[0]?.value ?? null;
   } catch { return null; }
 };
-const save = async (k, v, _sh = false) => {
+
+const save = async (k, v) => {
   try {
-    localStorage.setItem(k, JSON.stringify(v));
+    await fetch(`${SUPABASE_URL}/rest/v1/kv_store`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON,
+        'Authorization': `Bearer ${SUPABASE_ANON}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates'
+      },
+      body: JSON.stringify({ key: encodeURIComponent(k), value: v })
+    });
   } catch {}
 };
-
 // ── UI primitives ──
 function ProgressRing({pct,size=64,stroke=6,color="#2E86DE",textColor="#1a2233",trackColor="#e8ecf0"}){
   const r=(size-stroke)/2,circ=2*Math.PI*r,off=circ-(pct/100)*circ;

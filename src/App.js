@@ -814,11 +814,14 @@ const [rejectReason,setRejectReason]=useState("");
   const [survey,setSurvey]=useState(null);
   useEffect(()=>{
     Promise.all([load(`item_overrides_${emp.id}`,true),load(`item_notes_${emp.id}`,true),load(`ext_requests_${emp.id}`,true),load(`survey_on_${emp.id}`,true)])
-      .then(([ov,n,er,sv])=>{setItemOverrides(ov||{});setNotes(n||{});setExtReqs(er||[]);setSurvey(sv||null);});
+      .then(([empTpl,ov,n,er,sv])=>{
+        if(empTpl) setTpl(empTpl);
+        setItemOverrides(ov||{});setNotes(n||{});setExtReqs(er||[]);
+        setSurvey(sv||null);});
   }, [emp.id]);
 
   // Auto-save helpers — persist immediately on every change
-  async function updTpl(next){setTpl(next);await save("checklist_template",next,true);toast("자동 저장되었습니다.","success");}
+  async function updTpl(next){setTpl(next);await save(`emp_tpl_${emp.id}`,next,true);toast("자동 저장되었습니다.","success");}
   async function updOv(next){setItemOverrides(next);await save(`item_overrides_${emp.id}`,next,true);toast("자동 저장되었습니다.","success");}
   async function updNotes(next){setNotes(next);await save(`item_notes_${emp.id}`,next,true);}
 
@@ -1359,9 +1362,11 @@ function OffboardingDetail({employee, checks:initChecks, tpl:initTpl, onBack, is
       load(`off_notes_${employee.id}`,true),
       load(`off_ext_requests_${employee.id}`,true),
       load(`survey_off_${employee.id}`,true),
-    ]).then(([ov,n,er,sv])=>{
+      isAdmin ? load(`off_emp_tpl_${employee.id}`,true) : Promise.resolve(null),
+    ]).then(([ov,n,er,sv,empTpl])=>{
       setItemOverrides(ov||{}); setNotes(n||{}); setExtReqs(er||[]);
       if(sv){if(!sv.reloginApproved)setSurveyDone(true);setSurvey(sv);}
+      if(empTpl) setTpl(empTpl);
     });
   },[employee.id]);
 
@@ -1371,7 +1376,7 @@ function OffboardingDetail({employee, checks:initChecks, tpl:initTpl, onBack, is
     if(next[id])toast("✅ 항목 완료!","success");
   }
   async function updOv(next){setItemOverrides(next); await save(`off_item_overrides_${employee.id}`,next,true);}
-  async function updTpl(next){setTpl(next); await save("offboarding_template",next,true);}
+  async function updTpl(next){setTpl(next); await save(isAdmin?`off_emp_tpl_${employee.id}`:"offboarding_template",next,true);}
   async function updNotes(next){setNotes(next); await save(`off_notes_${employee.id}`,next,true);}
 
   async function submitExt(){

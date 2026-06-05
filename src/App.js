@@ -1871,7 +1871,7 @@ function AdminDashboard({onBack}){
     const p=calcProgress(checksMap[e.id]||{},tpl);
     const ok=filterStatus==="전체"||(filterStatus==="완료"&&p.pct===100)||(filterStatus==="진행중"&&p.pct>0&&p.pct<100)||(filterStatus==="미시작"&&p.pct===0);
     return(filterDept==="전체"||e.department===filterDept)&&ok;
-  });
+  }).sort((a,b)=>new Date(a.joinDate)-new Date(b.joinDate));
 
   // ext req stats
   const extAll=allExtReqs.length, extPending=allExtReqs.filter(r=>r.status==="pending").length, extApproved=allExtReqs.filter(r=>r.status==="approved").length;
@@ -2158,7 +2158,7 @@ const filteredExt=allExtReqs.filter(r=>{
           const p=calcProgress(offChecksMap[e.id]||{},offTpl);
           const ok=filterOffStatus==="전체"||(filterOffStatus==="완료"&&p.pct===100)||(filterOffStatus==="진행중"&&p.pct>0&&p.pct<100)||(filterOffStatus==="미시작"&&p.pct===0);
           return(filterOffDept==="전체"||e.department===filterOffDept)&&ok;
-        });
+        }).sort((a,b)=>new Date(a.leaveDate)-new Date(b.leaveDate));
         return(<div style={{background:"#fff",borderRadius:16,boxShadow:"0 2px 14px rgba(30,50,120,.07)",overflow:"hidden"}}>
           <div style={{padding:"13px 18px",borderBottom:"1px solid #f0f4fa",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:10}}>
             <span style={{fontWeight:700,fontSize:15,color:"#1a2233"}}>퇴사자 현황</span>

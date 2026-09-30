@@ -1680,14 +1680,35 @@ const rankOfPos=p=>{
 };
 const empIdNum=s=>{const m=String(s||"").match(/\d+/);return m?parseInt(m[0],10):Number.MAX_SAFE_INTEGER;};
 
-// 통계 탭 — 채용 대시보드와 같은 문법의 KPI 타일·꺾은선 그래프
-function Kpi({v,l,color}){
-  return(<div style={{flex:"1 1 120px",background:"linear-gradient(135deg,#f4f8ff,#fff)",border:"1px solid #e3e9f2",borderRadius:12,padding:"12px 14px"}}>
+// 통계 탭 — 채용 대시보드와 같은 문법의 KPI 타일·꺾은선 그래프·순위 막대
+function Kpi({v,l,color,onDbl}){
+  return(<div onDoubleClick={onDbl}
+    style={{flex:"1 1 120px",background:"linear-gradient(135deg,#f4f8ff,#fff)",border:"1px solid #e3e9f2",borderRadius:12,padding:"12px 14px",
+      cursor:onDbl?"pointer":"default",userSelect:onDbl?"none":"auto"}}>
     <div style={{fontSize:22,fontWeight:800,letterSpacing:"-.5px",color:color||"#151c2e"}}>{v}</div>
     <div style={{fontSize:11.5,color:"#66718c",marginTop:2}}>{l}</div>
+    {onDbl&&<div style={{fontSize:10,color:"#b9c3d8",marginTop:4,fontWeight:600}}>더블클릭 상세보기</div>}
+  </div>);
+}
+// 순위 막대 (채용 대시보드 '순위표' 스타일: 번호·이름·막대·인원·% 배지)
+function RankRows({rows,bar,badgeColor,badgeBg,badgeLine,base}){
+  const max=Math.max(...rows.map(r=>r.n),1);
+  if(!rows.length)return <div style={{padding:"18px 0",textAlign:"center",color:"#66718c",fontSize:12.5}}>데이터가 없습니다.</div>;
+  return(<div style={{display:"flex",flexDirection:"column",gap:4}}>
+    {rows.map((r,idx)=>(
+      <div key={r.name} style={{display:"grid",gridTemplateColumns:"20px minmax(56px,118px) 1fr 40px 52px",gap:9,alignItems:"center",padding:"6px 4px",borderRadius:9,fontSize:13,minHeight:30}}>
+        <span style={{fontWeight:800,color:"#151c2e",textAlign:"center",fontSize:12}}>{idx+1}</span>
+        <span style={{whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}} title={r.name}>{r.name}</span>
+        <span style={{minWidth:0}}><span style={{display:"block",height:9,borderRadius:20,width:`${Math.max(r.n/max*100,4)}%`,background:bar}}/></span>
+        <span style={{fontWeight:700,textAlign:"right",fontVariantNumeric:"tabular-nums"}}>{r.n}</span>
+        <span style={{fontSize:11,fontWeight:700,color:badgeColor,textAlign:"center",border:`1px solid ${badgeLine}`,borderRadius:8,padding:"3px 0",background:badgeBg,fontVariantNumeric:"tabular-nums"}}>
+          {base>0?((r.n/base)*100).toFixed(1)+"%":"—"}
+        </span>
+      </div>))}
   </div>);
 }
 function LineChartSvg({labels,series,height=230,width=620}){
+  const [tip,setTip]=useState(null); // 마우스가 올라간 달의 순번
   const L=46,R=14,T=16,B=40,iw=width-L-R,ih=height-T-B;
   const max=Math.max(1,...series.flatMap(s=>s.values));
   const rawStep=max/4,mag=Math.pow(10,Math.floor(Math.log10(rawStep)));
@@ -1695,27 +1716,49 @@ function LineChartSvg({labels,series,height=230,width=620}){
   const nice=tickStep*4;
   const x=i=>L+(labels.length===1?iw/2:iw*i/(labels.length-1));
   const y=v=>T+ih-(ih*v/nice);
+  const bandW=labels.length>1?iw/(labels.length-1):iw;
   return(<div>
     <div style={{display:"flex",gap:12,flexWrap:"wrap",fontSize:11.5,color:"#66718c",marginBottom:4}}>
       {series.map(s=>(<span key={s.name}>
         <i style={{display:"inline-block",width:10,height:10,borderRadius:3,marginRight:4,verticalAlign:-1,background:s.color}}/>{s.name}
       </span>))}
     </div>
-    <svg viewBox={`0 0 ${width} ${height}`} style={{width:"100%",height:"auto",display:"block"}} role="img">
-      {[0,1,2,3,4].map(k=>{const v=nice*k/4,yy=y(v);return(<g key={k}>
-        <line x1={L} y1={yy} x2={width-R} y2={yy} stroke="#eceff6"/>
-        <text x={L-8} y={yy+4} textAnchor="end" fontSize="10" fill="#8b93a7">{Number.isInteger(v)?v:Math.round(v*10)/10}</text>
-      </g>);})}
-      {labels.map((lb,i)=>(<text key={lb} x={x(i)} y={height-B+16} textAnchor="middle" fontSize="10" fill="#69718c">{lb}</text>))}
-      <line x1={L} y1={T} x2={L} y2={height-B} stroke="#dfe3ee"/>
-      <line x1={L} y1={height-B} x2={width-R} y2={height-B} stroke="#dfe3ee"/>
-      {series.map(s=>(<g key={s.name}>
-        <polyline points={s.values.map((v,i)=>`${x(i)},${y(v)}`).join(" ")} fill="none" stroke={s.color} strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round"/>
-        {s.values.map((v,i)=>(<circle key={i} cx={x(i)} cy={y(v)} r="3.6" fill="#fff" stroke={s.color} strokeWidth="2">
-          <title>{`${labels[i]} · ${s.name} ${v}명${s.rates&&s.rates[i]?` (${s.rates[i]})`:""}`}</title>
-        </circle>))}
-      </g>))}
-    </svg>
+    <div style={{position:"relative"}}>
+      <svg viewBox={`0 0 ${width} ${height}`} style={{width:"100%",height:"auto",display:"block"}} role="img"
+        onMouseLeave={()=>setTip(null)}>
+        {[0,1,2,3,4].map(k=>{const v=nice*k/4,yy=y(v);return(<g key={k}>
+          <line x1={L} y1={yy} x2={width-R} y2={yy} stroke="#eceff6"/>
+          <text x={L-8} y={yy+4} textAnchor="end" fontSize="10" fill="#8b93a7">{Number.isInteger(v)?v:Math.round(v*10)/10}</text>
+        </g>);})}
+        {labels.map((lb,i)=>(<text key={lb} x={x(i)} y={height-B+16} textAnchor="middle" fontSize="10" fill="#69718c">{lb}</text>))}
+        <line x1={L} y1={T} x2={L} y2={height-B} stroke="#dfe3ee"/>
+        <line x1={L} y1={height-B} x2={width-R} y2={height-B} stroke="#dfe3ee"/>
+        {tip!=null&&<line x1={x(tip)} y1={T} x2={x(tip)} y2={height-B} stroke="#2563eb" strokeDasharray="3 3" opacity=".5"/>}
+        {series.map(s=>(<g key={s.name}>
+          <polyline points={s.values.map((v,i)=>`${x(i)},${y(v)}`).join(" ")} fill="none" stroke={s.color} strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round"/>
+          {s.values.map((v,i)=>(<circle key={i} cx={x(i)} cy={y(v)} r={tip===i?4.6:3.6} fill="#fff" stroke={s.color} strokeWidth="2"/>))}
+        </g>))}
+        {/* 마우스 감지 영역 — 달 단위 세로 띠 (점이 작아도 어디서든 잡히게) */}
+        {labels.map((lb,i)=>{
+          const bx=Math.max(L,x(i)-bandW/2);
+          return(<rect key={"h"+i} x={bx} y={T} width={Math.min(x(i)+bandW/2,width-R)-bx} height={ih}
+            fill={tip===i?"rgba(37,99,235,.06)":"transparent"} style={{cursor:"crosshair"}}
+            onMouseEnter={()=>setTip(i)}/>);
+        })}
+      </svg>
+      {tip!=null&&(
+        <div style={{position:"absolute",left:`${x(tip)/width*100}%`,top:"4%",pointerEvents:"none",zIndex:5,
+          transform:tip<=1?"translateX(6px)":tip>=labels.length-2?"translateX(calc(-100% - 6px))":"translateX(-50%)",
+          background:"rgba(17,20,35,.93)",color:"#fff",borderRadius:10,padding:"8px 11px",
+          fontSize:12,lineHeight:1.7,whiteSpace:"nowrap",boxShadow:"0 10px 26px -8px rgba(0,0,0,.5)"}}>
+          <b>{labels[tip]}</b>
+          {series.map(s=>(<div key={s.name}>
+            <i style={{display:"inline-block",width:8,height:8,borderRadius:2,marginRight:5,verticalAlign:-1,background:s.color}}/>
+            {s.name} <b>{s.values[tip]}명</b>{s.rates&&s.rates[tip]&&s.rates[tip]!=="—"?` · ${s.rates[tip]}`:""}
+          </div>))}
+        </div>
+      )}
+    </div>
   </div>);
 }
 function AdminDashboard({onBack}){
@@ -1753,6 +1796,7 @@ function AdminDashboard({onBack}){
   const [sortOff,setSortOff]=useState({key:"leaveDate",dir:1});
   // 완료/진행 중 카드 더블클릭 상세
   const [statusModal,setStatusModal]=useState(null); // {tab:"on"|"off", status:"완료"|"진행중"}
+  const [kpiModal,setKpiModal]=useState(null); // 통계 '한눈에 보기' 더블클릭 상세: "join"|"leave"|"net"
   // 통계 탭: 입퇴사율 계산 기준 인원 (kv_store에 저장)
   const [headcount,setHeadcount]=useState("");
   useEffect(()=>{load("stats_headcount",true).then(v=>{if(v!=null)setHeadcount(String(v));});},[]);
@@ -2125,7 +2169,7 @@ const filteredExt=allExtReqs.filter(r=>{
         </div>
       )}
 
-      {/* ── 통계 탭: 채용 대시보드 통계와 같은 문법 (KPI 타일 + 꺾은선 그래프 + 표) ── */}
+      {/* ── 통계 탭: 채용 대시보드 통계와 같은 문법 (KPI 타일 + 꺾은선 그래프 + 순위 막대 + 표) ── */}
       {activeTab==="stats"&&(()=>{
         const ym=d=>String(d||"").slice(0,7), yy=d=>String(d||"").slice(0,4);
         const now=new Date();
@@ -2139,9 +2183,19 @@ const filteredExt=allExtReqs.filter(r=>{
         const thisYear=String(now.getFullYear());
         const joinY=employees.filter(e=>yy(e.joinDate)===thisYear).length;
         const leaveY=offEmps.filter(e=>yy(e.leaveDate)===thisYear).length;
+        const grp=(list,key)=>{const m={};list.forEach(e=>{const k=String(e[key]||"미정").trim()||"미정";m[k]=(m[k]||0)+1;});return Object.entries(m).map(([name,n])=>({name,n}));};
+        const deptJoin=grp(employees,"department").sort((a,b)=>b.n-a.n);
+        const deptLeave=grp(offEmps,"department").sort((a,b)=>b.n-a.n);
+        const posSort=(a,b)=>rankOfPos(a.name)-rankOfPos(b.name)||b.n-a.n;
+        const posJoin=grp(employees,"position").sort(posSort);
+        const posLeave=grp(offEmps,"position").sort(posSort);
         const card={background:"#fff",border:"1px solid #e3e9f2",borderRadius:14,padding:"16px 18px",boxShadow:"0 1px 3px rgba(23,28,55,.07)",marginBottom:14};
         const h3={fontSize:14.5,fontWeight:800,color:"#151c2e",margin:"0 0 4px",letterSpacing:"-.2px"};
         const sub={fontSize:11.5,color:"#66718c",marginBottom:12,lineHeight:1.6};
+        const colTitle=c=>({fontSize:12.5,fontWeight:800,color:c,margin:"0 0 6px"});
+        const JOIN_BAR="linear-gradient(90deg,#2563eb,#38bdf8)", LEAVE_BAR="linear-gradient(90deg,#e84c8b,#f07ab0)";
+        const joinBadge={badgeColor:"#1e4fd8",badgeBg:"#e3edff",badgeLine:"#b9d0f7"};
+        const leaveBadge={badgeColor:"#c2366f",badgeBg:"#fdf0f6",badgeLine:"#f7cfe0"};
         return(<div>
           <div style={card}>
             <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",flexWrap:"wrap",gap:10}}>
@@ -2158,21 +2212,49 @@ const filteredExt=allExtReqs.filter(r=>{
               </div>
             </div>
             <div style={{display:"flex",gap:10,flexWrap:"wrap",marginTop:6}}>
-              <Kpi v={`${joinY}명`} l={`${thisYear}년 입사`} color="#2563eb"/>
-              <Kpi v={rate(joinY)} l="입사율" color="#2563eb"/>
-              <Kpi v={`${leaveY}명`} l={`${thisYear}년 퇴사`} color="#e5484d"/>
-              <Kpi v={rate(leaveY)} l="퇴사율" color="#e5484d"/>
-              <Kpi v={`${joinY-leaveY>=0?"+":""}${joinY-leaveY}명`} l="순증감" color={joinY-leaveY>=0?"#2f9e44":"#e5484d"}/>
+              <Kpi v={`${joinY}명`} l={`${thisYear}년 입사`} color="#2563eb" onDbl={()=>setKpiModal("join")}/>
+              <Kpi v={rate(joinY)} l="입사율" color="#2563eb" onDbl={()=>setKpiModal("join")}/>
+              <Kpi v={`${leaveY}명`} l={`${thisYear}년 퇴사`} color="#e5484d" onDbl={()=>setKpiModal("leave")}/>
+              <Kpi v={rate(leaveY)} l="퇴사율" color="#e5484d" onDbl={()=>setKpiModal("leave")}/>
+              <Kpi v={`${joinY-leaveY>=0?"+":""}${joinY-leaveY}명`} l="순증감" color={joinY-leaveY>=0?"#2f9e44":"#e5484d"} onDbl={()=>setKpiModal("net")}/>
             </div>
           </div>
           <div style={card}>
             <h3 style={h3}>월간 입·퇴사 추이</h3>
-            <div style={sub}>최근 12개월 — 점에 마우스를 올리면 인원수와 비율이 보입니다</div>
+            <div style={sub}>최근 12개월 — 그래프에 마우스를 올리면 그 달의 인원수와 비율이 보입니다</div>
             <LineChartSvg labels={months.map(m=>m.slice(2))}
               series={[
                 {name:"입사",color:"#2563eb",values:joinM,rates:base>0?joinM.map(rate):null},
                 {name:"퇴사",color:"#e84c8b",values:leaveM,rates:base>0?leaveM.map(rate):null},
               ]}/>
+          </div>
+          <div style={card}>
+            <h3 style={h3}>부서별 입·퇴사</h3>
+            <div style={sub}>전체 기간 기준 · % = 기준 인원 대비</div>
+            <div style={{display:"flex",gap:24,flexWrap:"wrap"}}>
+              <div style={{flex:"1 1 300px",minWidth:0}}>
+                <div style={colTitle("#2563eb")}>입사</div>
+                <RankRows rows={deptJoin} bar={JOIN_BAR} base={base} {...joinBadge}/>
+              </div>
+              <div style={{flex:"1 1 300px",minWidth:0}}>
+                <div style={colTitle("#e84c8b")}>퇴사</div>
+                <RankRows rows={deptLeave} bar={LEAVE_BAR} base={base} {...leaveBadge}/>
+              </div>
+            </div>
+          </div>
+          <div style={card}>
+            <h3 style={h3}>직급별 입·퇴사</h3>
+            <div style={sub}>낮은 직급부터 · 전체 기간 기준 · % = 기준 인원 대비</div>
+            <div style={{display:"flex",gap:24,flexWrap:"wrap"}}>
+              <div style={{flex:"1 1 300px",minWidth:0}}>
+                <div style={colTitle("#2563eb")}>입사</div>
+                <RankRows rows={posJoin} bar={JOIN_BAR} base={base} {...joinBadge}/>
+              </div>
+              <div style={{flex:"1 1 300px",minWidth:0}}>
+                <div style={colTitle("#e84c8b")}>퇴사</div>
+                <RankRows rows={posLeave} bar={LEAVE_BAR} base={base} {...leaveBadge}/>
+              </div>
+            </div>
           </div>
           <div style={{...card,padding:0,overflow:"hidden"}}>
             <div style={{padding:"15px 18px 11px"}}>
@@ -2360,6 +2442,51 @@ const filteredExt=allExtReqs.filter(r=>{
         </div>);
       })()}
     </div>
+
+    {/* ── 통계 '한눈에 보기' 더블클릭 상세 ── */}
+    {kpiModal&&(()=>{
+      const yy=d=>String(d||"").slice(0,4);
+      const thisYear=String(new Date().getFullYear());
+      const joins=employees.filter(e=>yy(e.joinDate)===thisYear).sort((a,b)=>String(a.joinDate).localeCompare(String(b.joinDate)));
+      const leaves=offEmps.filter(e=>yy(e.leaveDate)===thisYear).sort((a,b)=>String(a.leaveDate).localeCompare(String(b.leaveDate)));
+      const sections=kpiModal==="join"?[["입사",joins,false]]:kpiModal==="leave"?[["퇴사",leaves,true]]:[["입사",joins,false],["퇴사",leaves,true]];
+      const title=kpiModal==="join"?`${thisYear}년 입사 (${joins.length}명)`
+        :kpiModal==="leave"?`${thisYear}년 퇴사 (${leaves.length}명)`
+        :`${thisYear}년 순증감 — 입사 ${joins.length} · 퇴사 ${leaves.length}`;
+      return(
+        <Modal title={title} onClose={()=>setKpiModal(null)} width={620}>
+          <p style={{fontSize:12,color:"#66718c",margin:"0 0 10px"}}>행을 클릭하면 그 사람의 체크리스트 상세로 이동합니다.</p>
+          <div style={{maxHeight:400,overflowY:"auto"}}>
+            {sections.map(([label,rows,isOff])=>(
+              <div key={label} style={{marginBottom:12}}>
+                {sections.length>1&&<div style={{fontWeight:800,fontSize:13,color:isOff?"#e84c8b":"#2563eb",margin:"4px 0 6px"}}>{label} {rows.length}명</div>}
+                <div style={{border:"1.5px solid #eef1f8",borderRadius:12,overflow:"hidden"}}>
+                  <table style={{width:"100%",borderCollapse:"collapse",fontSize:13}}>
+                    <thead><tr style={{background:"#f8faff"}}>
+                      {["사번","성명","부서","직급",isOff?"퇴사일":"입사일"].map(h=>
+                        <th key={h} style={{padding:"9px 11px",textAlign:"center",fontSize:11,fontWeight:700,color:"#66718c",whiteSpace:"nowrap"}}>{h}</th>)}
+                    </tr></thead>
+                    <tbody>
+                      {rows.map(e=>(
+                        <tr key={e.id} onClick={()=>{setKpiModal(null);isOff?setSelectedOff(e):setSelected(e);}}
+                          style={{borderBottom:"1px solid #f0f4fa",cursor:"pointer"}}
+                          onMouseEnter={ev=>ev.currentTarget.style.background="#f8faff"}
+                          onMouseLeave={ev=>ev.currentTarget.style.background="transparent"}>
+                          <td style={{padding:"9px 11px",textAlign:"center",color:"#66718c",fontSize:12}}>{e.empId||"-"}</td>
+                          <td style={{padding:"9px 11px",textAlign:"center",fontWeight:700,color:"#151c2e"}}>{e.name}</td>
+                          <td style={{padding:"9px 11px",textAlign:"center",color:"#4a5568"}}>{e.department}</td>
+                          <td style={{padding:"9px 11px",textAlign:"center",color:"#4a5568"}}>{e.position}</td>
+                          <td style={{padding:"9px 11px",textAlign:"center",color:"#4a5568"}}>{isOff?e.leaveDate:e.joinDate}</td>
+                        </tr>))}
+                      {rows.length===0&&<tr><td colSpan={5} style={{padding:20,textAlign:"center",color:"#66718c",fontSize:12.5}}>해당하는 인원이 없습니다.</td></tr>}
+                    </tbody>
+                  </table>
+                </div>
+              </div>))}
+          </div>
+        </Modal>
+      );
+    })()}
 
     {/* ── 완료/진행 중 카드 더블클릭 상세 ── */}
     {statusModal&&(()=>{

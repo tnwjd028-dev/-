@@ -813,7 +813,7 @@ const [rejectModal,setRejectModal]=useState(null);
 const [rejectReason,setRejectReason]=useState("");
   const [survey,setSurvey]=useState(null);
   useEffect(()=>{
-    Promise.all([load(`item_overrides_${emp.id}`,true),load(`item_notes_${emp.id}`,true),load(`ext_requests_${emp.id}`,true),load(`survey_on_${emp.id}`,true)])
+    Promise.all([load(`emp_tpl_${emp.id}`,true),load(`item_overrides_${emp.id}`,true),load(`item_notes_${emp.id}`,true),load(`ext_requests_${emp.id}`,true),load(`survey_on_${emp.id}`,true)])
       .then(([empTpl,ov,n,er,sv])=>{
         if(empTpl) setTpl(empTpl);
         setItemOverrides(ov||{});setNotes(n||{});setExtReqs(er||[]);
@@ -1368,7 +1368,7 @@ function OffboardingDetail({employee, checks:initChecks, tpl:initTpl, onBack, is
       if(sv){if(!sv.reloginApproved)setSurveyDone(true);setSurvey(sv);}
       if(empTpl) setTpl(empTpl);
     });
-  },[employee.id]);
+  },[employee.id,isAdmin]);
 
   async function toggle(id){
     const next={...checks,[id]:!checks[id]};

@@ -683,23 +683,6 @@ function SurveyModal({onClose,onSubmit,type="on",initialData=null}){
     </Modal>
   );
 }
-function SurveyResult({data}){
-  const stars=n=>[1,2,3,4,5].map(i=><span key={i} style={{color:i<=n?"#F5A623":"#ddd",fontSize:18}}>★</span>);
-  return(
-    <div style={{background:"#fffbf0",border:"1px solid #F5A62330",borderRadius:12,padding:"16px 18px",marginTop:20}}>
-      <div style={{fontWeight:800,fontSize:14,color:"#c07800",marginBottom:12}}>📊 만족도 설문 결과</div>
-      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
-        <span style={{fontSize:12,color:"#8899bb",fontWeight:600}}>전반적 만족도</span>
-        <span>{stars(data.rating)}</span>
-        <span style={{fontSize:12,fontWeight:700,color:"#F5A623"}}>{["","매우 불만족","불만족","보통","만족","매우 만족"][data.rating]}</span>
-      </div>
-      {data.helpful&&<div style={{marginBottom:8}}><div style={{fontSize:11,fontWeight:700,color:"#27AE60",marginBottom:2}}>도움이 된 부분</div><div style={{fontSize:13,color:"#1a2233",lineHeight:1.6,background:"#f6fff9",borderRadius:8,padding:"8px 12px",whiteSpace:"pre-wrap"}}>{data.helpful}</div></div>}
-      {data.improve&&<div style={{marginBottom:8}}><div style={{fontSize:11,fontWeight:700,color:"#E84545",marginBottom:2}}>개선 필요 부분</div><div style={{fontSize:13,color:"#1a2233",lineHeight:1.6,background:"#fff0f0",borderRadius:8,padding:"8px 12px",whiteSpace:"pre-wrap"}}>{data.improve}</div></div>}
-      {data.other&&<div><div style={{fontSize:11,fontWeight:700,color:"#8899bb",marginBottom:2}}>기타 의견</div><div style={{fontSize:13,color:"#1a2233",lineHeight:1.6,background:"#f8f9fb",borderRadius:8,padding:"8px 12px",whiteSpace:"pre-wrap"}}>{data.other}</div></div>}
-      <div style={{fontSize:11,color:"#bbb",marginTop:8}}>제출일: {fmtDT(data.submittedAt)}</div>
-    </div>
-  );
-}
 
 // ─────────────────────────────────────────────────────────
 // FILE ATTACH BUTTON
@@ -811,13 +794,11 @@ function AdminDetail({employee:initEmp,checks:initChecks,tpl:initTpl,onBack}){
   const [extPanel,setExtPanel]=useState(null);
 const [rejectModal,setRejectModal]=useState(null);
 const [rejectReason,setRejectReason]=useState("");
-  const [survey,setSurvey]=useState(null);
-  useEffect(()=>{
-    Promise.all([load(`emp_tpl_${emp.id}`,true),load(`item_overrides_${emp.id}`,true),load(`item_notes_${emp.id}`,true),load(`ext_requests_${emp.id}`,true),load(`survey_on_${emp.id}`,true)])
-      .then(([empTpl,ov,n,er,sv])=>{
+    useEffect(()=>{
+    Promise.all([load(`emp_tpl_${emp.id}`,true),load(`item_overrides_${emp.id}`,true),load(`item_notes_${emp.id}`,true),load(`ext_requests_${emp.id}`,true)])
+      .then(([empTpl,ov,n,er])=>{
         if(empTpl) setTpl(empTpl);
-        setItemOverrides(ov||{});setNotes(n||{});setExtReqs(er||[]);
-        setSurvey(sv||null);});
+        setItemOverrides(ov||{});setNotes(n||{});setExtReqs(er||[]);});
   }, [emp.id]);
 
   // Auto-save helpers — persist immediately on every change
@@ -1220,7 +1201,7 @@ const filteredExtReqs=extReqs.slice().reverse().filter(r=>{
         </div>);
       })}
     </div>
-    {survey&&<SurveyResult data={survey}/>}
+    
 
     {/* ── MODALS ── */}
     {deleteConfirm&&<ConfirmDialog message={deleteConfirm.type==="item"?"이 항목을 삭제하시겠습니까?":"이 카테고리와 모든 항목을 삭제하시겠습니까?"} onYes={executeDelete} onNo={()=>setDeleteConfirm(null)} yesLabel="Yes" noLabel="No"/>}
@@ -1620,7 +1601,7 @@ function OffboardingDetail({employee, checks:initChecks, tpl:initTpl, onBack, is
           }
         </div>}
       </div>)}
-      {isAdmin&&survey&&<SurveyResult data={survey}/>}
+      
     </div>
 
     {/* MODALS */}
@@ -1686,41 +1667,27 @@ function OffboardingDetail({employee, checks:initChecks, tpl:initTpl, onBack, is
 // ─────────────────────────────────────────────────────────
 // SURVEY STAT CARD (double-click to open dashboard)
 // ─────────────────────────────────────────────────────────
-function SurveyStatCard({employees,offEmps,onDoubleClick}){
-  const [count,setCount]=useState(0);
-  const [hov,setHov]=useState(false);
-  useEffect(()=>{
-    let cancelled=false;
-    async function calc(){
-      const onRes=await Promise.all(employees.map(e=>load(`survey_on_${e.id}`,true)));
-      const offRes=await Promise.all(offEmps.map(e=>load(`survey_off_${e.id}`,true)));
-      if(!cancelled)setCount([...onRes,...offRes].filter(Boolean).length);
-    }
-    calc();
-    return()=>{cancelled=true;};
-  },[employees,offEmps]);
-  return(
-    <div onDoubleClick={onDoubleClick}
-      onMouseEnter={()=>setHov(true)} onMouseLeave={()=>setHov(false)}
-      style={{background:hov?"linear-gradient(135deg,#f0edff,#e8e4ff)":"#fff",borderRadius:14,padding:"18px 20px",
-        boxShadow:hov?"0 4px 20px rgba(91,110,234,.18)":"0 2px 12px rgba(30,50,120,.07)",
-        cursor:"pointer",transition:"all .18s",border:hov?"1.5px solid #a084ee40":"1.5px solid transparent",
-        userSelect:"none"}}>
-      <div style={{fontSize:20,marginBottom:6}}>📊</div>
-      <div style={{fontSize:26,fontWeight:800,color:"#7c5ce8"}}>{count}</div>
-      <div style={{fontSize:13,color:"#b0b8c8",fontWeight:500,marginTop:2}}>만족도 조사</div>
-      <div style={{fontSize:10,color:"#c0b0e8",marginTop:4,fontWeight:600}}>더블클릭으로 열기</div>
-    </div>
-  );
-}
-
 // ─────────────────────────────────────────────────────────
 // ADMIN DASHBOARD
 // ─────────────────────────────────────────────────────────
+// 직급 서열 (낮은 순): 사원 < 대리·선임 < 과장·책임 < 차장·부장·수석 < 이사 < 전문위원 < 상무 < 전무 < 부사장 < 사장
+const POSITION_RANK={"인턴":0,"사원":1,"대리":2,"선임":2,"과장":3,"책임":3,"차장":4,"부장":4,"수석":4,"이사":5,"전문위원":6,"상무":7,"전무":8,"부사장":9,"사장":10};
+const rankOfPos=p=>{
+  const s=(p||"").trim();
+  if(POSITION_RANK[s]!==undefined)return POSITION_RANK[s];
+  for(const k of Object.keys(POSITION_RANK))if(s.startsWith(k))return POSITION_RANK[k]; // '책임연구원' 같은 변형 표기
+  return 99; // 서열 미정 (미정·공란 등)
+};
+const empIdNum=s=>{const m=String(s||"").match(/\d+/);return m?parseInt(m[0],10):Number.MAX_SAFE_INTEGER;};
 function AdminDashboard({onBack}){
   const [employees,setEmployees]=useState([]);
   const [checksMap,setChecksMap]=useState({});
   const [tpl,setTpl]=useState([]);
+  // 개인별 템플릿(항목 추가/삭제 반영) — 완료율을 상세 화면과 같은 기준으로 계산하기 위함
+  const [tplMap,setTplMap]=useState({});
+  const [offTplMap,setOffTplMap]=useState({});
+  const tplOf=e=>tplMap[e.id]||tpl;
+  const offTplOf=e=>offTplMap[e.id]||offTpl;
   const [selected,setSelected]=useState(null);
   const [showAdd,setShowAdd]=useState(false);
   const [form,setForm]=useState({name:"",empId:"",department:"",position:"",joinDate:"",email:""});
@@ -1742,23 +1709,14 @@ function AdminDashboard({onBack}){
   const [reloginReqs,setReloginReqs]=useState([]);
   const [reloginPanel,setReloginPanel]=useState(false);
 
-  // Survey dashboard
-  const [surveyDash,setSurveyDash]=useState(false);
-  const [surveyAllData,setSurveyAllData]=useState([]);
-  const [surveyTab,setSurveyTab]=useState("on");
-
-  async function loadSurveys(){
-    const onData=await Promise.all(employees.map(async e=>{
-      const sv=await load(`survey_on_${e.id}`,true);
-      return sv?{...sv,empName:e.name,department:e.department,position:e.position,type:"on"}:null;
-    }));
-    const offData=await Promise.all(offEmps.map(async e=>{
-      const sv=await load(`survey_off_${e.id}`,true);
-      return sv?{...sv,empName:e.name,department:e.department,position:e.position,type:"off"}:null;
-    }));
-    setSurveyAllData([...onData,...offData].filter(Boolean));
-    setSurveyDash(true);
-  }
+  // 정렬 (클릭: 오름차순, 더블클릭: 내림차순)
+  const [sortOn,setSortOn]=useState({key:"joinDate",dir:1});
+  const [sortOff,setSortOff]=useState({key:"leaveDate",dir:1});
+  // 완료/진행 중 카드 더블클릭 상세
+  const [statusModal,setStatusModal]=useState(null); // {tab:"on"|"off", status:"완료"|"진행중"}
+  // 통계 탭: 입퇴사율 계산 기준 인원 (kv_store에 저장)
+  const [headcount,setHeadcount]=useState("");
+  useEffect(()=>{load("stats_headcount",true).then(v=>{if(v!=null)setHeadcount(String(v));});},[]);
 
   // 퇴사자 탭
   const [activeTab,setActiveTab]=useState("onboarding");
@@ -1779,11 +1737,17 @@ function AdminDashboard({onBack}){
       load("relogin_requests",true),
     ]);
     const empList=emps||[]; setEmployees(empList); setTpl(t||DEFAULT_TEMPLATE); setAllExtReqs(er||[]); setReloginReqs(rlReqs||[]);
-    const map={}; await Promise.all(empList.map(async e=>{map[e.id]=(await load(`checks_${e.id}`,true))||{};}));
-    setChecksMap(map);
+    const map={},tplM={}; await Promise.all(empList.map(async e=>{
+      const [c,pt]=await Promise.all([load(`checks_${e.id}`,true),load(`emp_tpl_${e.id}`,true)]);
+      map[e.id]=c||{}; if(pt)tplM[e.id]=pt;
+    }));
+    setChecksMap(map); setTplMap(tplM);
     const offList=offEmpsRaw||[]; setOffEmps(offList); setOffTpl(offTplRaw||DEFAULT_OFFBOARDING_TEMPLATE);
-    const offMap={}; await Promise.all(offList.map(async e=>{offMap[e.id]=(await load(`off_checks_${e.id}`,true))||{};}));
-    setOffChecksMap(offMap);
+    const offMap={},offTplM={}; await Promise.all(offList.map(async e=>{
+      const [c,pt]=await Promise.all([load(`off_checks_${e.id}`,true),load(`off_emp_tpl_${e.id}`,true)]);
+      offMap[e.id]=c||{}; if(pt)offTplM[e.id]=pt;
+    }));
+    setOffChecksMap(offMap); setOffTplMap(offTplM);
     setLoading(false);
   },[]);
 
@@ -1802,7 +1766,6 @@ function AdminDashboard({onBack}){
     await save("employees",employees.filter(e=>e.id!==id),true); toast("삭제되었습니다.","info"); reload();
   }
 
-  function openJoinModal(){setEditTarget(null);setEditEmpForm({});setJoinModal(true);}
   function selectEditTarget(emp){setEditTarget(emp);setEditEmpForm({name:emp.name,empId:emp.empId||"",department:emp.department,position:emp.position,joinDate:emp.joinDate,email:emp.email||""});}
   async function saveEditEmp(){
     if(!editEmpForm.name||!editEmpForm.empId||!editEmpForm.department||!editEmpForm.position||!editEmpForm.joinDate){toast("필수 항목을 모두 입력해주세요.","warning");return;}
@@ -1811,9 +1774,20 @@ function AdminDashboard({onBack}){
     toast(`${editEmpForm.name}님 정보가 수정되었습니다.`,"success"); reload();
   }
 
+  // 퇴사자 정보 변경 (행의 ✏️ 버튼으로 열림)
+  const [offEditTarget,setOffEditTarget]=useState(null);
+  const [offEditForm,setOffEditForm]=useState({});
+  function openOffEdit(emp){setOffEditTarget(emp);setOffEditForm({name:emp.name,empId:emp.empId||"",department:emp.department,position:emp.position,leaveDate:emp.leaveDate,email:emp.email||""});}
+  async function saveEditOffEmp(){
+    if(!offEditForm.name||!offEditForm.empId||!offEditForm.department||!offEditForm.position||!offEditForm.leaveDate){toast("필수 항목을 모두 입력해주세요.","warning");return;}
+    const next=offEmps.map(e=>e.id===offEditTarget.id?{...e,...offEditForm}:e);
+    await save("offboarding_employees",next,true); setOffEditTarget(null);
+    toast(`${offEditForm.name}님 정보가 수정되었습니다.`,"success"); reload();
+  }
+
   async function sendReminder(emp){
     const ch=checksMap[emp.id]||[]; const over=[];
-    tpl.forEach(cat=>cat.items.forEach(item=>{if(!ch[item.id]&&isOverdue(emp.joinDate,cat.dueDays,false))over.push({label:item.label,deadline:fmtDeadline(emp.joinDate,cat.dueDays)});}));
+    tplOf(emp).forEach(cat=>cat.items.forEach(item=>{if(!ch[item.id]&&isOverdue(emp.joinDate,cat.dueDays,false))over.push({label:item.label,deadline:fmtDeadline(emp.joinDate,cat.dueDays)});}));
     if(!over.length){toast("미수행 기한 초과 항목이 없습니다.","info");return;}
     const body=`안녕하세요.\n\n${emp.name}님(${emp.department} / ${emp.position})의 다음 항목들이 기한 내에 완료되지 않았습니다:\n\n${over.map(o=>`• ${o.label}\n  → 제출 기한: ${o.deadline}까지`).join("\n\n")}\n\n기한 내에 완료해주시기 바랍니다.\n\n인사팀 드림`;
     const ok=await sendEmail(`[온보딩 알림] ${emp.name}님 미완료 항목 안내`,body);
@@ -1867,11 +1841,47 @@ function AdminDashboard({onBack}){
   if(selected)return <AdminDetail employee={selected} checks={checksMap[selected.id]||{}} tpl={tpl} onBack={()=>{setSelected(null);reload();}}/>;
 
   const depts=["전체",...new Set(employees.map(e=>e.department))];
+
+  // 열 정렬: 클릭=오름차순, 더블클릭=내림차순
+  function sortVal(e,key,isOff){
+    switch(key){
+      case "empId":return empIdNum(e.empId);
+      case "name":return e.name||"";
+      case "department":return e.department||"";
+      case "position":return rankOfPos(e.position);
+      case "joinDate":return new Date(e.joinDate).getTime()||0;
+      case "leaveDate":return new Date(e.leaveDate).getTime()||0;
+      case "elapsed":return -(new Date(isOff?e.leaveDate:e.joinDate).getTime()||0);
+      case "pct":case "status":return calcProgress((isOff?offChecksMap:checksMap)[e.id]||{},isOff?offTplOf(e):tplOf(e)).pct;
+      default:return 0;
+    }
+  }
+  function cmpEmp(a,b,sort,isOff){
+    const va=sortVal(a,sort.key,isOff),vb=sortVal(b,sort.key,isOff);
+    if(sort.key==="position"){
+      const ua=va>=99,ub=vb>=99;
+      if(ua!==ub)return ua?1:-1; // 서열 미정 직급은 오름/내림 무관 항상 맨 뒤
+    }
+    if(typeof va==="string")return sort.dir*va.localeCompare(vb,"ko");
+    return sort.dir*(va-vb);
+  }
+  const sortableTh=(cols,sort,setSort)=>cols.map(c=>(
+    <th key={c.h}
+      onClick={c.k?()=>setSort({key:c.k,dir:1}):undefined}
+      onDoubleClick={c.k?()=>setSort({key:c.k,dir:-1}):undefined}
+      title={c.k?"클릭: 오름차순 · 더블클릭: 내림차순":undefined}
+      style={{padding:"10px 13px",textAlign:"center",fontSize:11,fontWeight:700,
+        color:sort.key===c.k?"#5B6EEA":"#8899bb",letterSpacing:".4px",whiteSpace:"nowrap",
+        cursor:c.k?"pointer":"default",userSelect:"none"}}>
+      {c.h}{sort.key===c.k?(sort.dir===1?" ▲":" ▼"):""}
+    </th>
+  ));
+
   const filtered=employees.filter(e=>{
-    const p=calcProgress(checksMap[e.id]||{},tpl);
+    const p=calcProgress(checksMap[e.id]||{},tplOf(e));
     const ok=filterStatus==="전체"||(filterStatus==="완료"&&p.pct===100)||(filterStatus==="진행중"&&p.pct>0&&p.pct<100)||(filterStatus==="미시작"&&p.pct===0);
     return(filterDept==="전체"||e.department===filterDept)&&ok;
-  }).sort((a,b)=>new Date(a.joinDate)-new Date(b.joinDate));
+  }).sort((a,b)=>cmpEmp(a,b,sortOn,false));
 
   // ext req stats
   const extAll=allExtReqs.length, extPending=allExtReqs.filter(r=>r.status==="pending").length, extApproved=allExtReqs.filter(r=>r.status==="approved").length;
@@ -1908,7 +1918,7 @@ const filteredExt=allExtReqs.filter(r=>{
             <h1 style={{fontSize:21,fontWeight:800,margin:"0 0 10px",letterSpacing:"-.4px"}}>입퇴사 관리 인사이트</h1>
             {/* 탭 switcher */}
             <div style={{display:"flex",gap:6}}>
-              {[{key:"onboarding",label:"입사자",count:employees.length},{key:"offboarding",label:"퇴사자",count:offEmps.length}].map(tab=>(
+              {[{key:"onboarding",label:"입사자",count:employees.length},{key:"offboarding",label:"퇴사자",count:offEmps.length},{key:"stats",label:"📈 통계",count:0}].map(tab=>(
                 <button key={tab.key} onClick={()=>setActiveTab(tab.key)}
                   style={{background:activeTab===tab.key?"rgba(255,255,255,.25)":"rgba(255,255,255,.1)",
                     border:`1.5px solid ${activeTab===tab.key?"rgba(255,255,255,.7)":"rgba(255,255,255,.25)"}`,
@@ -1950,7 +1960,6 @@ const filteredExt=allExtReqs.filter(r=>{
               </button>
             )}
             {activeTab==="onboarding"&&<>
-              <SBtn onClick={openJoinModal}              bg="rgba(255,255,255,.18)" color="#fff" style={{padding:"7px 12px",fontSize:12,borderRadius:9,border:"1px solid rgba(255,255,255,.3)"}}>✏️ 정보 변경</SBtn>
               <SBtn onClick={()=>employees.forEach(sendReminder)} bg="rgba(255,255,255,.18)" color="#fff" style={{padding:"7px 12px",fontSize:12,borderRadius:9,border:"1px solid rgba(255,255,255,.3)"}}>📧 전체 알림</SBtn>
               <SBtn onClick={()=>setShowAdd(true)} bg="#fff" color="#5B6EEA" style={{padding:"7px 12px",fontSize:12,borderRadius:9,fontWeight:700}}>＋ 입사자</SBtn>
             </>}
@@ -2044,35 +2053,114 @@ const filteredExt=allExtReqs.filter(r=>{
       {activeTab==="onboarding"&&employees.length>0&&(
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(185px,1fr))",gap:12,marginBottom:20}}>
           {[{label:"전체 입사자",value:employees.length,red:false,icon:"👥"},
-            {label:"완료",value:employees.filter(e=>calcProgress(checksMap[e.id]||{},tpl).pct===100).length,red:false,icon:"✅"},
-            {label:"진행 중",value:employees.filter(e=>{const p=calcProgress(checksMap[e.id]||{},tpl).pct;return p>0&&p<100;}).length,red:false,icon:"🔄"},
-            {label:"미시작",value:employees.filter(e=>calcProgress(checksMap[e.id]||{},tpl).pct===0).length,red:true,icon:"⚠️"},
+            {label:"완료",value:employees.filter(e=>calcProgress(checksMap[e.id]||{},tplOf(e)).pct===100).length,red:false,icon:"✅",st:"완료"},
+            {label:"진행 중",value:employees.filter(e=>{const p=calcProgress(checksMap[e.id]||{},tplOf(e)).pct;return p>0&&p<100;}).length,red:false,icon:"🔄",st:"진행중"},
+            {label:"미시작",value:employees.filter(e=>calcProgress(checksMap[e.id]||{},tplOf(e)).pct===0).length,red:true,icon:"⚠️"},
           ].map(c=>(
-            <div key={c.label} style={{background:"#fff",borderRadius:14,padding:"18px 20px",boxShadow:"0 2px 12px rgba(30,50,120,.07)"}}>
+            <div key={c.label} onDoubleClick={c.st?()=>setStatusModal({tab:"on",status:c.st}):undefined}
+              style={{background:"#fff",borderRadius:14,padding:"18px 20px",boxShadow:"0 2px 12px rgba(30,50,120,.07)",
+                cursor:c.st?"pointer":"default",userSelect:c.st?"none":"auto"}}>
               <div style={{fontSize:20,marginBottom:6}}>{c.icon}</div>
               <div style={{fontSize:26,fontWeight:800,color:c.red?"#E84545":"#3a3a4a"}}>{c.value}</div>
               <div style={{fontSize:13,color:"#b0b8c8",fontWeight:500,marginTop:2}}>{c.label}</div>
+              {c.st&&<div style={{fontSize:10,color:"#c5cbe0",marginTop:4,fontWeight:600}}>더블클릭 상세보기</div>}
             </div>
           ))}
-          <SurveyStatCard employees={employees} offEmps={[]} checksMap={checksMap} tpl={tpl} onDoubleClick={loadSurveys}/>
         </div>
       )}
       {activeTab==="offboarding"&&offEmps.length>0&&(
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(185px,1fr))",gap:12,marginBottom:20}}>
           {[{label:"전체 퇴사자",value:offEmps.length,red:false,icon:"🚪"},
-            {label:"처리 완료",value:offEmps.filter(e=>calcProgress(offChecksMap[e.id]||{},offTpl).pct===100).length,red:false,icon:"✅"},
-            {label:"진행 중",value:offEmps.filter(e=>{const p=calcProgress(offChecksMap[e.id]||{},offTpl).pct;return p>0&&p<100;}).length,red:false,icon:"🔄"},
-            {label:"미시작",value:offEmps.filter(e=>calcProgress(offChecksMap[e.id]||{},offTpl).pct===0).length,red:true,icon:"⏳"},
+            {label:"처리 완료",value:offEmps.filter(e=>calcProgress(offChecksMap[e.id]||{},offTplOf(e)).pct===100).length,red:false,icon:"✅",st:"완료"},
+            {label:"진행 중",value:offEmps.filter(e=>{const p=calcProgress(offChecksMap[e.id]||{},offTplOf(e)).pct;return p>0&&p<100;}).length,red:false,icon:"🔄",st:"진행중"},
+            {label:"미시작",value:offEmps.filter(e=>calcProgress(offChecksMap[e.id]||{},offTplOf(e)).pct===0).length,red:true,icon:"⏳"},
           ].map(c=>(
-            <div key={c.label} style={{background:"#fff",borderRadius:14,padding:"18px 20px",boxShadow:"0 2px 12px rgba(30,50,120,.07)"}}>
+            <div key={c.label} onDoubleClick={c.st?()=>setStatusModal({tab:"off",status:c.st}):undefined}
+              style={{background:"#fff",borderRadius:14,padding:"18px 20px",boxShadow:"0 2px 12px rgba(30,50,120,.07)",
+                cursor:c.st?"pointer":"default",userSelect:c.st?"none":"auto"}}>
               <div style={{fontSize:20,marginBottom:6}}>{c.icon}</div>
               <div style={{fontSize:26,fontWeight:800,color:c.red?"#E84545":"#3a3a4a"}}>{c.value}</div>
               <div style={{fontSize:13,color:"#b0b8c8",fontWeight:500,marginTop:2}}>{c.label}</div>
+              {c.st&&<div style={{fontSize:10,color:"#c5cbe0",marginTop:4,fontWeight:600}}>더블클릭 상세보기</div>}
             </div>
           ))}
-          <SurveyStatCard employees={[]} offEmps={offEmps} checksMap={{}} tpl={offTpl} onDoubleClick={loadSurveys}/>
         </div>
       )}
+
+      {/* ── 통계 탭: 월간·연간 입퇴사 현황과 비율 ── */}
+      {activeTab==="stats"&&(()=>{
+        const ym=d=>String(d||"").slice(0,7), yy=d=>String(d||"").slice(0,4);
+        const now=new Date();
+        const months=[];
+        for(let i=11;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);months.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`);}
+        const joinM=months.map(m=>employees.filter(e=>ym(e.joinDate)===m).length);
+        const leaveM=months.map(m=>offEmps.filter(e=>ym(e.leaveDate)===m).length);
+        const maxM=Math.max(...joinM,...leaveM,1);
+        const years=[...new Set([...employees.map(e=>yy(e.joinDate)),...offEmps.map(e=>yy(e.leaveDate))])].filter(y=>y&&y!=="unde").sort();
+        const base=parseInt(headcount,10)||0;
+        const rate=n=>base>0?((n/base)*100).toFixed(1)+"%":"—";
+        const card={background:"#fff",borderRadius:16,boxShadow:"0 2px 14px rgba(30,50,120,.07)",padding:"18px 22px",marginBottom:16};
+        return(<div>
+          <div style={{...card,display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
+            <span style={{fontWeight:700,fontSize:14,color:"#1a2233"}}>입·퇴사율 기준 인원(현재 재직 인원)</span>
+            <input type="number" value={headcount} onChange={e=>setHeadcount(e.target.value)} placeholder="예: 233"
+              style={{width:90,padding:"6px 10px",borderRadius:8,border:"1.5px solid #e2e8f0",fontSize:13,fontFamily:"inherit",outline:"none"}}/>
+            <span style={{fontSize:13,color:"#8899bb"}}>명</span>
+            <SBtn onClick={async()=>{await save("stats_headcount",parseInt(headcount,10)||0,true);toast("기준 인원을 저장했습니다.","success");}} bg="#5B6EEA" color="#fff" style={{padding:"6px 14px"}}>저장</SBtn>
+            <span style={{fontSize:11,color:"#b0b8c8"}}>※ 통계는 이 사이트에 등록된 입·퇴사자 기준이며, 비율 = 인원수 ÷ 기준 인원</span>
+          </div>
+          <div style={card}>
+            <div style={{fontWeight:700,fontSize:15,color:"#1a2233",marginBottom:14}}>월간 입·퇴사 (최근 12개월) <span style={{fontSize:11,fontWeight:500,color:"#b0b8c8"}}>— 인원수 · 월간 입/퇴사율</span></div>
+            <div style={{display:"flex",gap:14,marginBottom:10,fontSize:12,color:"#8899bb"}}>
+              <span><span style={{display:"inline-block",width:10,height:10,background:"#5B6EEA",borderRadius:3,marginRight:5}}/>입사</span>
+              <span><span style={{display:"inline-block",width:10,height:10,background:"#e84c8b",borderRadius:3,marginRight:5}}/>퇴사</span>
+            </div>
+            {months.map((m,i)=>(
+              <div key={m} style={{display:"flex",alignItems:"center",gap:10,marginBottom:7}}>
+                <span style={{fontSize:12,color:"#8899bb",minWidth:58,fontVariantNumeric:"tabular-nums"}}>{m}</span>
+                <div style={{flex:1}}>
+                  <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:2}}>
+                    <div style={{flex:1,height:9,background:"#eef1f8",borderRadius:5,overflow:"hidden"}}>
+                      <div style={{height:"100%",width:`${(joinM[i]/maxM)*100}%`,background:"#5B6EEA",borderRadius:5,transition:"width .4s"}}/>
+                    </div>
+                    <span style={{fontSize:11,fontWeight:700,color:"#5B6EEA",minWidth:64,textAlign:"right"}}>{joinM[i]?`${joinM[i]}명${base>0?` · ${rate(joinM[i])}`:""}`:""}</span>
+                  </div>
+                  <div style={{display:"flex",alignItems:"center",gap:6}}>
+                    <div style={{flex:1,height:9,background:"#eef1f8",borderRadius:5,overflow:"hidden"}}>
+                      <div style={{height:"100%",width:`${(leaveM[i]/maxM)*100}%`,background:"#e84c8b",borderRadius:5,transition:"width .4s"}}/>
+                    </div>
+                    <span style={{fontSize:11,fontWeight:700,color:"#e84c8b",minWidth:64,textAlign:"right"}}>{leaveM[i]?`${leaveM[i]}명${base>0?` · ${rate(leaveM[i])}`:""}`:""}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div style={{...card,padding:0,overflow:"hidden"}}>
+            <div style={{fontWeight:700,fontSize:15,color:"#1a2233",padding:"15px 22px",borderBottom:"1px solid #f0f4fa"}}>연간 입·퇴사율</div>
+            <table style={{width:"100%",borderCollapse:"collapse",fontSize:14}}>
+              <thead><tr style={{background:"#f8faff"}}>
+                {["연도","입사","입사율","퇴사","퇴사율","순증감"].map(h=>
+                  <th key={h} style={{padding:"10px 13px",textAlign:"center",fontSize:11,fontWeight:700,color:"#8899bb"}}>{h}</th>)}
+              </tr></thead>
+              <tbody>
+                {years.map(y=>{
+                  const j=employees.filter(e=>yy(e.joinDate)===y).length;
+                  const l=offEmps.filter(e=>yy(e.leaveDate)===y).length;
+                  return(<tr key={y} style={{borderBottom:"1px solid #f0f4fa"}}>
+                    <td style={{padding:"11px",textAlign:"center",fontWeight:700,color:"#1a2233"}}>{y}년</td>
+                    <td style={{padding:"11px",textAlign:"center",color:"#5B6EEA",fontWeight:700}}>{j}명</td>
+                    <td style={{padding:"11px",textAlign:"center",color:"#5B6EEA"}}>{rate(j)}</td>
+                    <td style={{padding:"11px",textAlign:"center",color:"#e84c8b",fontWeight:700}}>{l}명</td>
+                    <td style={{padding:"11px",textAlign:"center",color:"#e84c8b"}}>{rate(l)}</td>
+                    <td style={{padding:"11px",textAlign:"center",fontWeight:700,color:j-l>=0?"#27AE60":"#E84545"}}>{j-l>=0?"+":""}{j-l}명</td>
+                  </tr>);
+                })}
+                {years.length===0&&<tr><td colSpan={6} style={{padding:26,textAlign:"center",color:"#8899bb",fontSize:13}}>데이터가 없습니다.</td></tr>}
+              </tbody>
+            </table>
+          </div>
+        </div>);
+      })()}
 
       {activeTab==="onboarding"&&<div style={{background:"#fff",borderRadius:16,boxShadow:"0 2px 14px rgba(30,50,120,.07)",overflow:"hidden"}}>
         <div style={{padding:"13px 18px",borderBottom:"1px solid #f0f4fa",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:10}}>
@@ -2100,14 +2188,13 @@ const filteredExt=allExtReqs.filter(r=>{
             <table style={{width:"100%",borderCollapse:"collapse",fontSize:14}}>
               <thead>
                 <tr style={{background:"#f8faff"}}>
-                  {["사번","성명","부서","직급","입사일","경과일","완료율","상태","액션"].map(h=>(
-                    <th key={h} style={{padding:"10px 13px",textAlign:"center",fontSize:11,fontWeight:700,color:"#8899bb",letterSpacing:".4px",whiteSpace:"nowrap"}}>{h}</th>
-                  ))}
+                  {sortableTh([{h:"사번",k:"empId"},{h:"성명",k:"name"},{h:"부서",k:"department"},{h:"직급",k:"position"},
+                    {h:"입사일",k:"joinDate"},{h:"경과일",k:"elapsed"},{h:"완료율",k:"pct"},{h:"상태",k:"status"},{h:"액션",k:null}],sortOn,setSortOn)}
                 </tr>
               </thead>
               <tbody>
                 {filtered.map(emp=>{
-                  const {pct}=calcProgress(checksMap[emp.id]||{},tpl);
+                  const {pct}=calcProgress(checksMap[emp.id]||{},tplOf(emp));
                   const elapsed=daysBetween(emp.joinDate);
                   const sc=pct===100?"#27AE60":pct===0?"#E84545":"#F5A623";
                   const st=pct===100?"완료":pct===0?"미시작":"진행중";
@@ -2138,6 +2225,7 @@ const filteredExt=allExtReqs.filter(r=>{
                     <td style={{padding:"12px 13px",textAlign:"center"}}><Badge text={st} color={sc}/></td>
                     <td style={{padding:"12px 13px",textAlign:"center"}}>
                       <div style={{display:"flex",justifyContent:"center",gap:5}}>
+                        <SBtn onClick={e=>{e.stopPropagation();selectEditTarget(emp);setJoinModal(true);}} bg="#f0f4ff" color="#5B6EEA" style={{border:"1px solid #d5defc"}}>✏️ 정보변경</SBtn>
                         <SBtn onClick={e=>{e.stopPropagation();sendReminder(emp);}} bg="#fff4f4" color="#E84545" style={{border:"1px solid #ffcccc"}}>📧 알림</SBtn>
                         <SBtn onClick={e=>{e.stopPropagation();deleteEmployee(emp.id);}} bg="#f4f7fb" color="#8899bb" style={{border:"1px solid #e2e8f0"}}>삭제</SBtn>
                       </div>
@@ -2155,10 +2243,10 @@ const filteredExt=allExtReqs.filter(r=>{
       {activeTab==="offboarding"&&(()=>{
         const offDepts=["전체",...new Set(offEmps.map(e=>e.department))];
         const offFiltered=offEmps.filter(e=>{
-          const p=calcProgress(offChecksMap[e.id]||{},offTpl);
+          const p=calcProgress(offChecksMap[e.id]||{},offTplOf(e));
           const ok=filterOffStatus==="전체"||(filterOffStatus==="완료"&&p.pct===100)||(filterOffStatus==="진행중"&&p.pct>0&&p.pct<100)||(filterOffStatus==="미시작"&&p.pct===0);
           return(filterOffDept==="전체"||e.department===filterOffDept)&&ok;
-        }).sort((a,b)=>new Date(a.leaveDate)-new Date(b.leaveDate));
+        }).sort((a,b)=>cmpEmp(a,b,sortOff,true));
         return(<div style={{background:"#fff",borderRadius:16,boxShadow:"0 2px 14px rgba(30,50,120,.07)",overflow:"hidden"}}>
           <div style={{padding:"13px 18px",borderBottom:"1px solid #f0f4fa",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:10}}>
             <span style={{fontWeight:700,fontSize:15,color:"#1a2233"}}>퇴사자 현황</span>
@@ -2185,14 +2273,13 @@ const filteredExt=allExtReqs.filter(r=>{
               <table style={{width:"100%",borderCollapse:"collapse",fontSize:14}}>
                 <thead>
                   <tr style={{background:"#f8faff"}}>
-                    {["사번","성명","부서","직급","퇴사일","경과일","완료율","상태","액션"].map(h=>(
-                      <th key={h} style={{padding:"10px 13px",textAlign:"center",fontSize:11,fontWeight:700,color:"#8899bb",letterSpacing:".4px",whiteSpace:"nowrap"}}>{h}</th>
-                    ))}
+                    {sortableTh([{h:"사번",k:"empId"},{h:"성명",k:"name"},{h:"부서",k:"department"},{h:"직급",k:"position"},
+                      {h:"퇴사일",k:"leaveDate"},{h:"경과일",k:"elapsed"},{h:"완료율",k:"pct"},{h:"상태",k:"status"},{h:"액션",k:null}],sortOff,setSortOff)}
                   </tr>
                 </thead>
                 <tbody>
                   {offFiltered.map(emp=>{
-                    const {pct}=calcProgress(offChecksMap[emp.id]||{},offTpl);
+                    const {pct}=calcProgress(offChecksMap[emp.id]||{},offTplOf(emp));
                     const elapsed=daysBetween(emp.leaveDate);
                     const sc=pct===100?"#27AE60":pct===0?"#8899bb":"#F5A623";
                     const st=pct===100?"완료":pct===0?"미시작":"진행중";
@@ -2217,6 +2304,7 @@ const filteredExt=allExtReqs.filter(r=>{
                       <td style={{padding:"12px 13px",textAlign:"center"}}><Badge text={st} color={sc}/></td>
                       <td style={{padding:"12px 13px",textAlign:"center"}}>
                         <div style={{display:"flex",justifyContent:"center",gap:5}}>
+                          <SBtn onClick={e=>{e.stopPropagation();openOffEdit(emp);}} bg="#fdf0f6" color="#e84c8b" style={{border:"1px solid #f7cfe0"}}>✏️ 정보변경</SBtn>
                           <SBtn onClick={e=>{e.stopPropagation();deleteOffboardingEmployee(emp.id);}} bg="#f4f7fb" color="#8899bb" style={{border:"1px solid #e2e8f0"}}>삭제</SBtn>
                         </div>
                       </td>
@@ -2230,6 +2318,65 @@ const filteredExt=allExtReqs.filter(r=>{
         </div>);
       })()}
     </div>
+
+    {/* ── 완료/진행 중 카드 더블클릭 상세 ── */}
+    {statusModal&&(()=>{
+      const isOff=statusModal.tab==="off";
+      const src=isOff?offEmps:employees;
+      const rows=src.filter(e=>{
+        const p=calcProgress((isOff?offChecksMap:checksMap)[e.id]||{},isOff?offTplOf(e):tplOf(e)).pct;
+        return statusModal.status==="완료"?p===100:(p>0&&p<100);
+      }).sort((a,b)=>(a.name||"").localeCompare(b.name||"","ko"));
+      const color=statusModal.status==="완료"?"#27AE60":"#F5A623";
+      return(
+        <Modal title={`${isOff?"퇴사자":"입사자"} ${statusModal.status==="완료"?"✅ 완료":"🔄 진행 중"} (${rows.length}명)`}
+          onClose={()=>setStatusModal(null)} width={620}>
+          <p style={{fontSize:12,color:"#8899bb",margin:"0 0 10px"}}>행을 클릭하면 그 사람의 체크리스트 상세로 이동합니다.</p>
+          <div style={{maxHeight:380,overflowY:"auto",border:"1.5px solid #eef1f8",borderRadius:12}}>
+            <table style={{width:"100%",borderCollapse:"collapse",fontSize:13}}>
+              <thead><tr style={{background:"#f8faff",position:"sticky",top:0}}>
+                {["사번","성명","부서","직급",isOff?"퇴사일":"입사일","완료율"].map(h=>
+                  <th key={h} style={{padding:"9px 11px",textAlign:"center",fontSize:11,fontWeight:700,color:"#8899bb",whiteSpace:"nowrap"}}>{h}</th>)}
+              </tr></thead>
+              <tbody>
+                {rows.map(e=>{
+                  const p=calcProgress((isOff?offChecksMap:checksMap)[e.id]||{},isOff?offTplOf(e):tplOf(e)).pct;
+                  return(<tr key={e.id} onClick={()=>{setStatusModal(null);isOff?setSelectedOff(e):setSelected(e);}}
+                    style={{borderBottom:"1px solid #f0f4fa",cursor:"pointer"}}
+                    onMouseEnter={ev=>ev.currentTarget.style.background="#f8faff"}
+                    onMouseLeave={ev=>ev.currentTarget.style.background="transparent"}>
+                    <td style={{padding:"10px 11px",textAlign:"center",color:"#8899bb",fontSize:12}}>{e.empId||"-"}</td>
+                    <td style={{padding:"10px 11px",textAlign:"center",fontWeight:700,color:"#1a2233"}}>{e.name}</td>
+                    <td style={{padding:"10px 11px",textAlign:"center",color:"#4a5568"}}>{e.department}</td>
+                    <td style={{padding:"10px 11px",textAlign:"center",color:"#4a5568"}}>{e.position}</td>
+                    <td style={{padding:"10px 11px",textAlign:"center",color:"#4a5568"}}>{isOff?e.leaveDate:e.joinDate}</td>
+                    <td style={{padding:"10px 11px",textAlign:"center",fontWeight:700,color}}>{p}%</td>
+                  </tr>);
+                })}
+                {rows.length===0&&<tr><td colSpan={6} style={{padding:24,textAlign:"center",color:"#8899bb",fontSize:13}}>해당하는 인원이 없습니다.</td></tr>}
+              </tbody>
+            </table>
+          </div>
+        </Modal>
+      );
+    })()}
+
+    {/* ── 퇴사자 정보 변경 (행의 ✏️ 버튼) ── */}
+    {offEditTarget&&(
+      <Modal title={`✏️ ${offEditTarget.name} 정보 변경`} onClose={()=>setOffEditTarget(null)} titleColor="#e84c8b">
+        {[{k:"name",l:"성명 *",t:"text",p:"홍길동"},{k:"empId",l:"사번 *",t:"text",p:"EMP001"},
+          {k:"department",l:"부서 *",t:"text",p:"개발팀"},{k:"position",l:"직급 *",t:"text",p:"사원"},
+          {k:"leaveDate",l:"퇴사일 *",t:"date",p:""},{k:"email",l:"이메일",t:"email",p:"hong@company.com"}].map(f=>(
+          <Field key={f.k} label={f.l}>
+            <FI type={f.t} value={offEditForm[f.k]||""} onChange={e=>setOffEditForm(p=>({...p,[f.k]:e.target.value}))} placeholder={f.p}/>
+          </Field>
+        ))}
+        <div style={{display:"flex",gap:10,marginTop:14}}>
+          <PBtn onClick={saveEditOffEmp} color="#e84c8b" style={{flex:1}}>저장</PBtn>
+          <OBtn onClick={()=>setOffEditTarget(null)} style={{flex:1}}>취소</OBtn>
+        </div>
+      </Modal>
+    )}
 
     {showAddOff&&(
       <Modal title="퇴사자 등록" onClose={()=>setShowAddOff(false)} titleColor="#E84545">
@@ -2304,97 +2451,6 @@ const filteredExt=allExtReqs.filter(r=>{
       </Modal>
     )}
 
-    {surveyDash&&(()=>{
-      const onData=surveyAllData.filter(d=>d.type==="on");
-      const offData=surveyAllData.filter(d=>d.type==="off");
-      const tabData=surveyTab==="on"?onData:offData;
-      const tabColor=surveyTab==="on"?"#5B6EEA":"#e84c8b";
-      const avg=tabData.length?(tabData.reduce((s,d)=>s+d.rating,0)/tabData.length).toFixed(1):"—";
-      const dist=[1,2,3,4,5].map(i=>({star:i,count:tabData.filter(d=>d.rating===i).length}));
-      const maxDist=Math.max(...dist.map(d=>d.count),1);
-      return(
-        <div style={{position:"fixed",inset:0,background:"rgba(10,18,40,.55)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:400,padding:16}} onClick={()=>setSurveyDash(false)}>
-          <div style={{background:"#fff",borderRadius:24,padding:"32px 28px",width:"100%",maxWidth:700,maxHeight:"88vh",overflowY:"auto",boxShadow:"0 20px 80px rgba(0,0,0,.24)"}} onClick={e=>e.stopPropagation()}>
-            {/* Header */}
-            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:20}}>
-              <div>
-                <div style={{fontSize:11,fontWeight:700,letterSpacing:"2px",color:"#a084ee",marginBottom:4}}>SURVEY RESULTS</div>
-                <h2 style={{fontWeight:800,fontSize:20,color:"#1a2233",margin:0}}>📊 만족도 조사 대시보드</h2>
-              </div>
-              <button onClick={()=>setSurveyDash(false)} style={{background:"#f4f7fb",border:"none",borderRadius:8,width:34,height:34,cursor:"pointer",fontSize:16,color:"#8899bb"}}>✕</button>
-            </div>
-            {/* Tabs */}
-            <div style={{display:"flex",gap:8,marginBottom:24,background:"#f4f7fb",borderRadius:12,padding:4}}>
-              {[{key:"on",label:"입사자 온보딩",count:onData.length,color:"#5B6EEA"},
-                {key:"off",label:"퇴사자 오프보딩",count:offData.length,color:"#e84c8b"}].map(t=>(
-                <button key={t.key} onClick={()=>setSurveyTab(t.key)}
-                  style={{flex:1,padding:"9px 12px",borderRadius:9,border:"none",cursor:"pointer",fontFamily:"inherit",fontWeight:700,fontSize:13,
-                    background:surveyTab===t.key?"#fff":"transparent",
-                    color:surveyTab===t.key?t.color:"#8899bb",
-                    boxShadow:surveyTab===t.key?"0 2px 8px rgba(30,50,120,.1)":"none",
-                    transition:"all .15s"}}>
-                  {t.label} <span style={{fontWeight:800}}>({t.count})</span>
-                </button>
-              ))}
-            </div>
-            {/* Content */}
-            {tabData.length===0?(
-              <div style={{textAlign:"center",padding:"40px 0",color:"#8899bb"}}>
-                <div style={{fontSize:36,marginBottom:10}}>📭</div>
-                <div style={{fontWeight:700,fontSize:15}}>아직 제출된 설문이 없습니다</div>
-              </div>
-            ):(
-              <>
-                {/* Summary cards */}
-                <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,marginBottom:20}}>
-                  {[{label:"응답 건수",value:tabData.length+"건",icon:"📋",color:tabColor},
-                    {label:"평균 만족도",value:`${avg}★`,icon:"⭐",color:"#F5A623"},
-                    {label:"5점 응답",value:tabData.filter(d=>d.rating===5).length+"건",icon:"🏆",color:"#27AE60"},
-                  ].map(c=>(
-                    <div key={c.label} style={{background:`${c.color}10`,border:`1.5px solid ${c.color}30`,borderRadius:14,padding:"16px",textAlign:"center"}}>
-                      <div style={{fontSize:22,marginBottom:4}}>{c.icon}</div>
-                      <div style={{fontSize:22,fontWeight:800,color:c.color}}>{c.value}</div>
-                      <div style={{fontSize:12,color:"#8899bb",marginTop:2}}>{c.label}</div>
-                    </div>
-                  ))}
-                </div>
-                {/* Rating distribution */}
-                <div style={{background:"#f8faff",borderRadius:14,padding:"18px 20px",marginBottom:20}}>
-                  <div style={{fontWeight:700,fontSize:13,color:"#1a2233",marginBottom:14}}>별점 분포</div>
-                  {dist.slice().reverse().map(d=>(
-                    <div key={d.star} style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}>
-                      <span style={{fontSize:13,fontWeight:700,color:"#F5A623",minWidth:24}}>{d.star}★</span>
-                      <div style={{flex:1,height:16,background:"#eee",borderRadius:8,overflow:"hidden"}}>
-                        <div style={{height:"100%",width:`${(d.count/maxDist)*100}%`,background:"linear-gradient(90deg,#F5A623,#f7c35f)",borderRadius:8,transition:"width .4s"}}/>
-                      </div>
-                      <span style={{fontSize:12,color:"#8899bb",minWidth:24,textAlign:"right"}}>{d.count}</span>
-                    </div>
-                  ))}
-                </div>
-                {/* Individual responses */}
-                <div style={{fontWeight:700,fontSize:13,color:"#1a2233",marginBottom:12}}>개별 응답 ({tabData.length}건)</div>
-                {tabData.slice().sort((a,b)=>new Date(b.submittedAt)-new Date(a.submittedAt)).map((d,i)=>(
-                  <div key={i} style={{background:"#fff",border:"1.5px solid #f0f0f8",borderRadius:14,padding:"16px 18px",marginBottom:10,boxShadow:"0 2px 8px rgba(30,50,120,.05)"}}>
-                    <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10,flexWrap:"wrap"}}>
-                      <div style={{width:34,height:34,borderRadius:10,background:`linear-gradient(135deg,${tabColor},${surveyTab==="on"?"#7c5ce8":"#f07ab0"})`,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:800,fontSize:13,flexShrink:0}}>{d.empName[0]}</div>
-                      <div style={{flex:1}}>
-                        <span style={{fontWeight:700,fontSize:14,color:"#1a2233"}}>{d.empName}</span>
-                        <span style={{fontSize:12,color:"#8899bb",marginLeft:6}}>{d.department} · {d.position}</span>
-                      </div>
-                      <div style={{display:"flex",gap:1}}>{[1,2,3,4,5].map(j=><span key={j} style={{color:j<=d.rating?"#F5A623":"#ddd",fontSize:18}}>★</span>)}</div>
-                      <span style={{fontSize:11,color:"#bbb"}}>{fmtDT(d.submittedAt)}</span>
-                    </div>
-                    {d.helpful&&<div style={{marginBottom:6}}><span style={{fontSize:11,fontWeight:700,color:"#27AE60"}}>✅ 도움된 부분 </span><span style={{fontSize:13,color:"#1a2233"}}>{d.helpful}</span></div>}
-                    {d.improve&&<div style={{marginBottom:6}}><span style={{fontSize:11,fontWeight:700,color:"#E84545"}}>🔧 개선 필요 </span><span style={{fontSize:13,color:"#1a2233"}}>{d.improve}</span></div>}
-                    {d.other&&<div><span style={{fontSize:11,fontWeight:700,color:"#8899bb"}}>💬 기타 </span><span style={{fontSize:13,color:"#1a2233"}}>{d.other}</span></div>}
-                  </div>
-                ))}
-              </>
-            )}
-          </div>
-        </div>
-      );
-    })()}
   </div>);
 }
 

@@ -1901,7 +1901,7 @@ const filteredExt=allExtReqs.filter(r=>{
   return(<div style={{minHeight:"100vh",background:"linear-gradient(135deg,#e8e4ff 0%,#f5f3ff 50%,#e4f0ff 100%)",fontFamily:"'Pretendard',sans-serif"}}>
     <div style={{background:"linear-gradient(135deg,#5B6EEA,#7c5ce8)",padding:"20px 24px",color:"#fff",boxShadow:"0 4px 24px rgba(100,80,200,.2)"}}>
       <div style={{maxWidth:1100,margin:"0 auto"}}>
-        <button onClick={onBack} style={{background:"rgba(255,255,255,.15)",border:"none",color:"#fff",padding:"5px 12px",borderRadius:7,fontSize:12,cursor:"pointer",marginBottom:12,fontFamily:"inherit"}}>← 로그아웃</button>
+        {onBack&&<button onClick={onBack} style={{background:"rgba(255,255,255,.15)",border:"none",color:"#fff",padding:"5px 12px",borderRadius:7,fontSize:12,cursor:"pointer",marginBottom:12,fontFamily:"inherit"}}>← 로그아웃</button>}
         <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",flexWrap:"wrap",gap:12}}>
           <div>
             <div style={{fontSize:10,fontWeight:700,letterSpacing:"3px",color:"rgba(255,255,255,.7)",marginBottom:4}}>BI MATRIX</div>
@@ -2414,7 +2414,9 @@ function UserOffboardingChecklist({employee,onBack}){
 }
 
 export default function App(){
-  const [view,setView]=useState("home");
+  // 2026-09-30: 로그인 화면 제거 — 관리자만 사용하므로 바로 관리자 체크리스트로 시작.
+  // (입사자/퇴사자 로그인·관리자 비밀번호 화면 코드는 남겨둠 — "home"으로 되돌리면 복구)
+  const [view,setView]=useState("adminDash");
   const [currentUser,setCurrentUser]=useState(null);
   useEffect(()=>{
     const l=document.createElement("link");
@@ -2430,6 +2432,6 @@ export default function App(){
   if(view==="userChecklist")return <UserChecklist employee={currentUser} onBack={()=>setView("home")}/>;
   if(view==="userOffboarding")return <UserOffboardingChecklist employee={currentUser} onBack={()=>setView("home")}/>;
   if(view==="adminLogin")return <AdminLogin onLogin={()=>setView("adminDash")} onBack={()=>setView("home")}/>;
-  if(view==="adminDash")return <AdminDashboard onBack={()=>setView("home")}/>;
+  if(view==="adminDash")return <AdminDashboard onBack={null}/>;
   return null;
 }

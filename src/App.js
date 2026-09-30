@@ -26,11 +26,11 @@ const DEFAULT_TEMPLATE = [
   { id:"cat_1", category:"입사 2주 전", dueDays:-14, color:"#9B59B6",
     items:[{id:"c01",label:"근로계약서 서명 및 제출"},{id:"c02",label:"개인정보 수집·이용 동의서 제출"},
            {id:"c03",label:"보안서약서 서명 및 제출"}]},
-  { id:"cat_2", category:"입사 1주 전", dueDays:-7, color:"#2E86DE",
+  { id:"cat_2", category:"입사 1주 전", dueDays:-7, color:"#2563eb",
     items:[{id:"c04",label:"신분증 사본 제출"},{id:"c05",label:"통장 사본 제출 (급여 계좌)"},
            {id:"w01",label:"4대보험 가입신청서 제출"},{id:"w02",label:"주민등록등본 제출 (3개월 이내 발급)"},
            {id:"w03",label:"가족관계증명서 제출 (해당자)"}]},
-  { id:"cat_3", category:"입사 당일", dueDays:0, color:"#E84545",
+  { id:"cat_3", category:"입사 당일", dueDays:0, color:"#e5484d",
     items:[{id:"w04",label:"최종학력증명서 제출"},{id:"w05",label:"경력증명서 제출 (경력자 해당)"},
            {id:"w06",label:"자격증 사본 제출 (해당자)"},{id:"m01",label:"건강검진 결과서 제출"}]},
   { id:"cat_4", category:"입사 후", dueDays:30, color:"#27AE60",
@@ -38,14 +38,14 @@ const DEFAULT_TEMPLATE = [
            {id:"m04",label:"팀 OT(오리엔테이션) 완료"},{id:"m05",label:"멘토 1:1 미팅 완료"},
            {id:"m06",label:"사내 복지제도 안내 확인"}]},
 ];
-const CAT_COLORS = ["#E84545","#F5A623","#2E86DE","#27AE60","#9B59B6","#16A085","#E67E22","#34495E"];
+const CAT_COLORS = ["#e5484d","#F5A623","#2563eb","#27AE60","#9B59B6","#16A085","#E67E22","#34495E"];
 
 const DEFAULT_OFFBOARDING_TEMPLATE = [
-  { id:"ocat_1", category:"퇴사 당일", dueDays:0, color:"#E84545",
+  { id:"ocat_1", category:"퇴사 당일", dueDays:0, color:"#e5484d",
     items:[{id:"o01",label:"보안유지서약서 작성 및 제출"},{id:"o02",label:"사원증 반납"}]},
   { id:"ocat_2", category:"퇴사 1주일 전", dueDays:-7, color:"#F5A623",
     items:[{id:"o03",label:"노트북 반납"},{id:"o04",label:"모니터 및 기타 장비 반납"},{id:"o05",label:"계정/시스템 접근 권한 회수"}]},
-  { id:"ocat_3", category:"퇴사 1개월 전", dueDays:-30, color:"#2E86DE",
+  { id:"ocat_3", category:"퇴사 1개월 전", dueDays:-30, color:"#2563eb",
     items:[{id:"o06",label:"인수인계 문서 작성 완료"},{id:"o07",label:"퇴직연금 정산 확인"},{id:"o08",label:"연차 발생일 계산 및 정산 확인"}]},
 ];
 
@@ -61,7 +61,7 @@ const fmtDT = iso => { if(!iso)return""; const d=new Date(iso); return `${d.getF
 
 
 function toast(msg,type="info"){
-  const C={info:"#2E86DE",success:"#27AE60",warning:"#F5A623",error:"#E84545"};
+  const C={info:"#2563eb",success:"#27AE60",warning:"#F5A623",error:"#e5484d"};
   const el=document.createElement("div");
   el.style.cssText=`position:fixed;bottom:26px;right:26px;background:${C[type]};color:#fff;padding:12px 20px;border-radius:10px;font-family:'Pretendard',sans-serif;font-size:14px;font-weight:600;z-index:9999;box-shadow:0 6px 24px rgba(0,0,0,.2);animation:_t .3s ease`;
   el.textContent=msg;
@@ -97,7 +97,7 @@ const save = async (k, v) => {
   } catch {}
 };
 // ── UI primitives ──
-function ProgressRing({pct,size=64,stroke=6,color="#2E86DE",textColor="#1a2233",trackColor="#e8ecf0"}){
+function ProgressRing({pct,size=64,stroke=6,color="#2563eb",textColor="#151c2e",trackColor="#e8ecf0"}){
   const r=(size-stroke)/2,circ=2*Math.PI*r,off=circ-(pct/100)*circ;
   return(<svg width={size} height={size} style={{transform:"rotate(-90deg)"}}>
     <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={trackColor} strokeWidth={stroke}/>
@@ -111,53 +111,53 @@ function Badge({text,color}){
 function FI({value,onChange,placeholder="",type="text",style={},onKeyDown,autoFocus}){
   const [f,setF]=useState(false);
   return <input autoFocus={autoFocus} type={type} value={value} onChange={onChange} placeholder={placeholder} onKeyDown={onKeyDown}
-    style={{width:"100%",padding:"10px 13px",borderRadius:9,border:`1.5px solid ${f?"#2E86DE":"#e2e8f0"}`,fontSize:14,outline:"none",boxSizing:"border-box",transition:"border .2s",fontFamily:"inherit",...style}}
+    style={{width:"100%",padding:"10px 13px",borderRadius:9,border:`1.5px solid ${f?"#2563eb":"#e3e9f2"}`,fontSize:14,outline:"none",boxSizing:"border-box",transition:"border .2s",fontFamily:"inherit",...style}}
     onFocus={()=>setF(true)} onBlur={()=>setF(false)}/>;
 }
-function Field({label,children}){return <div style={{marginBottom:14}}><label style={{fontSize:12,fontWeight:700,color:"#8899bb",display:"block",marginBottom:5,letterSpacing:".4px"}}>{label}</label>{children}</div>;}
-function Modal({title,onClose,children,width=480,titleColor="#1a2233"}){
+function Field({label,children}){return <div style={{marginBottom:14}}><label style={{fontSize:12,fontWeight:700,color:"#66718c",display:"block",marginBottom:5,letterSpacing:".4px"}}>{label}</label>{children}</div>;}
+function Modal({title,onClose,children,width=480,titleColor="#151c2e"}){
   return(<div style={{position:"fixed",inset:0,background:"rgba(10,18,40,.5)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:400,padding:16}} onClick={onClose}>
     <div style={{background:"#fff",borderRadius:20,padding:"32px 28px",width,maxWidth:"94vw",maxHeight:"90vh",overflowY:"auto",boxShadow:"0 20px 80px rgba(0,0,0,.24)"}} onClick={e=>e.stopPropagation()}>
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:20}}>
         <h3 style={{fontWeight:800,fontSize:17,color:titleColor,margin:0}}>{title}</h3>
-        <button onClick={onClose} style={{background:"#f4f7fb",border:"none",borderRadius:8,width:32,height:32,cursor:"pointer",fontSize:15,color:"#8899bb"}}>✕</button>
+        <button onClick={onClose} style={{background:"#f4f7fb",border:"none",borderRadius:8,width:32,height:32,cursor:"pointer",fontSize:15,color:"#66718c"}}>✕</button>
       </div>
       {children}
     </div>
   </div>);
 }
-function ConfirmDialog({message,onYes,onNo,yesColor="#E84545",yesLabel="Yes, 삭제",noLabel="No"}){
+function ConfirmDialog({message,onYes,onNo,yesColor="#e5484d",yesLabel="Yes, 삭제",noLabel="No"}){
   return(<div style={{position:"fixed",inset:0,background:"rgba(10,18,40,.55)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:500,padding:16}}>
     <div style={{background:"#fff",borderRadius:18,padding:"32px 28px",width:380,maxWidth:"92vw",boxShadow:"0 20px 80px rgba(0,0,0,.24)"}}>
       <div style={{fontSize:22,textAlign:"center",marginBottom:14}}>⚠️</div>
-      <p style={{fontSize:15,fontWeight:600,color:"#1a2233",textAlign:"center",lineHeight:1.6,margin:"0 0 24px"}}>{message}</p>
+      <p style={{fontSize:15,fontWeight:600,color:"#151c2e",textAlign:"center",lineHeight:1.6,margin:"0 0 24px"}}>{message}</p>
       <div style={{display:"flex",gap:10}}>
         <button onClick={onYes} style={{flex:1,background:yesColor,color:"#fff",border:"none",borderRadius:10,padding:"13px",fontSize:14,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>{yesLabel}</button>
-        <button onClick={onNo} style={{flex:1,background:"transparent",color:"#8899bb",border:"1.5px solid #e2e8f0",borderRadius:10,padding:"13px",fontSize:14,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}>{noLabel}</button>
+        <button onClick={onNo} style={{flex:1,background:"transparent",color:"#66718c",border:"1.5px solid #e3e9f2",borderRadius:10,padding:"13px",fontSize:14,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}>{noLabel}</button>
       </div>
     </div>
   </div>);
 }
-function SBtn({children,onClick,bg="#f0f4fa",color="#5B6EEA",hoverBg,style={},title=""}){
+function SBtn({children,onClick,bg="#f0f4fa",color="#2563eb",hoverBg,style={},title=""}){
   const [hov,setHov]=useState(false);
   return <button onClick={onClick} title={title}
     onMouseEnter={()=>setHov(true)} onMouseLeave={()=>setHov(false)}
     style={{background:hov&&hoverBg?hoverBg:bg,color,border:"none",borderRadius:7,padding:"4px 10px",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"inherit",transition:"background .15s,opacity .15s",opacity:hov?0.85:1,...style}}>{children}</button>;
 }
-function PBtn({children,onClick,color="#2E86DE",disabled=false,style={}}){
+function PBtn({children,onClick,color="#2563eb",disabled=false,style={}}){
   return <button onClick={disabled?undefined:onClick} disabled={disabled} style={{background:color,color:"#fff",border:"none",borderRadius:10,padding:"12px 18px",fontSize:14,fontWeight:700,cursor:disabled?"not-allowed":"pointer",opacity:disabled?.5:1,fontFamily:"inherit",...style}}>{children}</button>;
 }
-function OBtn({children,onClick,color="#8899bb",style={}}){
+function OBtn({children,onClick,color="#66718c",style={}}){
   return <button onClick={onClick} style={{background:"transparent",color,border:`1.5px solid ${color}`,borderRadius:10,padding:"11px 18px",fontSize:14,fontWeight:600,cursor:"pointer",fontFamily:"inherit",...style}}>{children}</button>;
 }
-function IBtn({icon,label,onClick,active=false,disabled=false,color="#5B6EEA"}){
+function IBtn({icon,label,onClick,active=false,disabled=false,color="#2563eb"}){
   const [h,setH]=useState(false);
   return(<button onClick={disabled?undefined:onClick} title={label} onMouseEnter={()=>setH(true)} onMouseLeave={()=>setH(false)}
     style={{display:"flex",flexDirection:"column",alignItems:"center",gap:2,background:active?"#e8f0ff":h&&!disabled?"#f0f4fa":"transparent",
       border:`1.5px solid ${active?color:"transparent"}`,borderRadius:8,padding:"5px 8px",cursor:disabled?"not-allowed":"pointer",
       opacity:disabled?.35:1,transition:"all .15s",minWidth:46,fontFamily:"inherit"}}>
     <span style={{fontSize:16,lineHeight:1}}>{icon}</span>
-    <span style={{fontSize:9,fontWeight:700,color:active?color:"#8899bb",letterSpacing:".2px",whiteSpace:"nowrap"}}>{label}</span>
+    <span style={{fontSize:9,fontWeight:700,color:active?color:"#66718c",letterSpacing:".2px",whiteSpace:"nowrap"}}>{label}</span>
   </button>);
 }
 
@@ -222,29 +222,29 @@ function UserHome({onLogin}){
   }
 
   if(blockedEmp) return(
-    <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Pretendard',sans-serif",position:"relative",padding:"16px",background:"linear-gradient(135deg,#e8e4ff 0%,#f5f3ff 50%,#e4f0ff 100%)"}}>
-      <div style={{background:"#fff",borderRadius:28,boxShadow:"0 8px 48px rgba(100,80,200,.13)",padding:"40px 32px",width:"100%",maxWidth:420,position:"relative",zIndex:1}}>
+    <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Pretendard',sans-serif",position:"relative",padding:"16px",background:"radial-gradient(1000px 480px at 85% -10%,#d5e8ff 0%,transparent 60%),radial-gradient(900px 420px at -10% 0%,#dbf1ff 0%,transparent 55%),#f2f5fb"}}>
+      <div style={{background:"#fff",borderRadius:28,boxShadow:"0 8px 48px rgba(37,99,235,.13)",padding:"40px 32px",width:"100%",maxWidth:420,position:"relative",zIndex:1}}>
         <div style={{textAlign:"center",marginBottom:24}}>
-          <div style={{width:64,height:64,background:"linear-gradient(135deg,#5B6EEA,#7c5ce8)",borderRadius:18,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px",fontSize:28}}>✅</div>
-          <div style={{fontSize:11,fontWeight:700,letterSpacing:"3px",color:"#a084ee",marginBottom:8}}>BI MATRIX</div>
-          <h2 style={{fontSize:18,fontWeight:800,color:"#1a1a2e",margin:"0 0 10px",lineHeight:1.5}}>모든 온보딩 체크리스트가<br/>완료되었습니다.</h2>
-          <p style={{fontSize:13,color:"#8899bb",lineHeight:1.7,margin:0}}>접속이 필요한 경우,<br/>인사기획팀에 문의주세요.</p>
+          <div style={{width:64,height:64,background:"linear-gradient(135deg,#2563eb,#38bdf8)",borderRadius:18,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px",fontSize:28}}>✅</div>
+          <div style={{fontSize:11,fontWeight:700,letterSpacing:"3px",color:"#38bdf8",marginBottom:8}}>BI MATRIX</div>
+          <h2 style={{fontSize:18,fontWeight:800,color:"#151c2e",margin:"0 0 10px",lineHeight:1.5}}>모든 온보딩 체크리스트가<br/>완료되었습니다.</h2>
+          <p style={{fontSize:13,color:"#66718c",lineHeight:1.7,margin:0}}>접속이 필요한 경우,<br/>인사기획팀에 문의주세요.</p>
         </div>
         <div style={{borderTop:"1px solid #f0f0f8",paddingTop:20}}>
           {reloginSent?(
-            <div style={{background:"#f0f8ff",border:"1px solid #2E86DE30",borderRadius:12,padding:"16px",textAlign:"center"}}>
+            <div style={{background:"#f0f8ff",border:"1px solid #2563eb30",borderRadius:12,padding:"16px",textAlign:"center"}}>
               <div style={{fontSize:20,marginBottom:8}}>📬</div>
-              <div style={{fontWeight:700,fontSize:14,color:"#2E86DE",marginBottom:4}}>재로그인 요청이 접수되었습니다</div>
-              <div style={{fontSize:12,color:"#8899bb",lineHeight:1.6}}>인사기획팀 승인 후 접속 가능합니다.</div>
+              <div style={{fontWeight:700,fontSize:14,color:"#2563eb",marginBottom:4}}>재로그인 요청이 접수되었습니다</div>
+              <div style={{fontSize:12,color:"#66718c",lineHeight:1.6}}>인사기획팀 승인 후 접속 가능합니다.</div>
             </div>
           ):(
             <>
-              <div style={{fontSize:13,fontWeight:700,color:"#1a2233",marginBottom:8}}>🔓 재로그인 요청</div>
+              <div style={{fontSize:13,fontWeight:700,color:"#151c2e",marginBottom:8}}>🔓 재로그인 요청</div>
               <textarea value={reloginReason} onChange={e=>setReloginReason(e.target.value)}
                 placeholder="재접속이 필요한 사유를 입력해주세요." rows={3}
-                style={{width:"100%",padding:"10px 13px",borderRadius:9,border:"1.5px solid #e2e8f0",fontSize:13,outline:"none",resize:"none",fontFamily:"inherit",boxSizing:"border-box",lineHeight:1.6,marginBottom:10}}/>
+                style={{width:"100%",padding:"10px 13px",borderRadius:9,border:"1.5px solid #e3e9f2",fontSize:13,outline:"none",resize:"none",fontFamily:"inherit",boxSizing:"border-box",lineHeight:1.6,marginBottom:10}}/>
               <button onClick={submitReloginRequest}
-                style={{width:"100%",padding:"13px",borderRadius:14,border:"none",background:"linear-gradient(135deg,#5B6EEA,#7c5ce8)",color:"#fff",fontSize:14,fontWeight:700,cursor:"pointer",fontFamily:"inherit",marginBottom:10}}>
+                style={{width:"100%",padding:"13px",borderRadius:14,border:"none",background:"linear-gradient(135deg,#2563eb,#38bdf8)",color:"#fff",fontSize:14,fontWeight:700,cursor:"pointer",fontFamily:"inherit",marginBottom:10}}>
                 재로그인 요청 보내기
               </button>
             </>
@@ -259,7 +259,7 @@ function UserHome({onLogin}){
   );
 
   const BG = (
-    <div style={{position:"fixed",inset:0,background:"linear-gradient(135deg,#e8e4ff 0%,#f5f3ff 50%,#e4f0ff 100%)",zIndex:0}}>
+    <div style={{position:"fixed",inset:0,background:"radial-gradient(1000px 480px at 85% -10%,#d5e8ff 0%,transparent 60%),radial-gradient(900px 420px at -10% 0%,#dbf1ff 0%,transparent 55%),#f2f5fb",zIndex:0}}>
       <div style={{position:"absolute",top:32,left:32,width:72,height:72,borderRadius:18,background:"rgba(130,100,255,.18)"}}/>
       <div style={{position:"absolute",top:28,right:36,width:60,height:60,borderRadius:16,background:"rgba(100,200,190,.18)"}}/>
       <div style={{position:"absolute",bottom:36,left:40,width:52,height:52,borderRadius:14,background:"rgba(255,120,120,.18)"}}/>
@@ -270,11 +270,11 @@ function UserHome({onLogin}){
   const wrap = children => (
     <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Pretendard',sans-serif",position:"relative",padding:"16px"}}>
       {BG}
-      <div style={{background:"#fff",borderRadius:28,boxShadow:"0 8px 48px rgba(100,80,200,.13)",padding:"clamp(28px,5vw,44px) clamp(20px,5vw,40px) 32px",width:"100%",maxWidth:400,position:"relative",zIndex:1,boxSizing:"border-box"}}>
+      <div style={{background:"#fff",borderRadius:28,boxShadow:"0 8px 48px rgba(37,99,235,.13)",padding:"clamp(28px,5vw,44px) clamp(20px,5vw,40px) 32px",width:"100%",maxWidth:400,position:"relative",zIndex:1,boxSizing:"border-box"}}>
         <div style={{textAlign:"center",marginBottom:28}}>
-          <div style={{width:56,height:56,background:"linear-gradient(135deg,#7c5ce8,#a084ee)",borderRadius:16,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 14px",fontSize:26}}>📋</div>
-          <div style={{fontSize:11,fontWeight:700,letterSpacing:"3px",color:"#a084ee",marginBottom:6}}>BI MATRIX</div>
-          <h1 style={{fontSize:22,fontWeight:800,color:"#1a1a2e",margin:"0 0 6px",letterSpacing:"-.3px"}}>입/퇴사 체크리스트</h1>
+          <div style={{width:56,height:56,background:"linear-gradient(135deg,#38bdf8,#38bdf8)",borderRadius:16,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 14px",fontSize:26}}>📋</div>
+          <div style={{fontSize:11,fontWeight:700,letterSpacing:"3px",color:"#38bdf8",marginBottom:6}}>BI MATRIX</div>
+          <h1 style={{fontSize:22,fontWeight:800,color:"#151c2e",margin:"0 0 6px",letterSpacing:"-.3px"}}>입/퇴사 체크리스트</h1>
           <p style={{color:"#9090aa",fontSize:13,margin:0}}>아래 유형을 선택하세요</p>
         </div>
         {children}
@@ -285,18 +285,18 @@ function UserHome({onLogin}){
   if(!type) return wrap(
     <div style={{display:"flex",flexDirection:"column",gap:14}}>
       <div style={{display:"flex",gap:14,flexWrap:"wrap"}}>
-        {[{key:"onboarding",label:"입사자",sub:"온보딩 체크리스트",grad:"linear-gradient(135deg,#5B6EEA,#7c5ce8)",
+        {[{key:"onboarding",label:"입사자",sub:"온보딩 체크리스트",grad:"linear-gradient(135deg,#2563eb,#38bdf8)",
             icon:<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10,17 15,12 10,7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>},
-          {key:"offboarding",label:"퇴사자",sub:"오프보딩 체크리스트",grad:"linear-gradient(135deg,#e84c8b,#E84545)",
+          {key:"offboarding",label:"퇴사자",sub:"오프보딩 체크리스트",grad:"linear-gradient(135deg,#e84c8b,#e5484d)",
             icon:<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>}
           ].map(t=>(
           <button key={t.key} onClick={()=>setType(t.key)}
             style={{flex:"1 1 120px",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:8,
               padding:"24px 12px",borderRadius:20,border:"none",background:t.grad,
               cursor:"pointer",fontFamily:"inherit",transition:"transform .18s, box-shadow .18s",
-              boxShadow:"0 4px 18px rgba(100,80,200,.22)"}}
-            onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-3px)";e.currentTarget.style.boxShadow="0 8px 28px rgba(100,80,200,.32)";}}
-            onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="0 4px 18px rgba(100,80,200,.22)";}}>
+              boxShadow:"0 4px 18px rgba(37,99,235,.22)"}}
+            onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-3px)";e.currentTarget.style.boxShadow="0 8px 28px rgba(37,99,235,.32)";}}
+            onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="0 4px 18px rgba(37,99,235,.22)";}}>
             {t.icon}
             <span style={{fontWeight:800,fontSize:17,color:"#fff"}}>{t.label}</span>
             <span style={{fontSize:11,color:"rgba(255,255,255,.8)",fontWeight:500}}>{t.sub}</span>
@@ -315,8 +315,8 @@ function UserHome({onLogin}){
   );
 
   const isOn=type==="onboarding";
-  const accentGrad=isOn?"linear-gradient(135deg,#5B6EEA,#7c5ce8)":"linear-gradient(135deg,#e84c8b,#E84545)";
-  const accentColor=isOn?"#5B6EEA":"#E84545";
+  const accentGrad=isOn?"linear-gradient(135deg,#2563eb,#38bdf8)":"linear-gradient(135deg,#e84c8b,#e5484d)";
+  const accentColor=isOn?"#2563eb":"#e5484d";
   return wrap(
     <div style={{display:"flex",flexDirection:"column",gap:13}}>
       <button onClick={()=>{setType(null);setErr("");}} style={{background:"none",border:"none",color:"#9090aa",fontSize:13,cursor:"pointer",fontFamily:"inherit",fontWeight:600,textAlign:"left",marginBottom:2,padding:0}}>← 유형 선택으로</button>
@@ -327,11 +327,11 @@ function UserHome({onLogin}){
       <Field label="성명"><FI value={name} onChange={e=>setName(e.target.value)} placeholder="홍길동" onKeyDown={e=>e.key==="Enter"&&submit()}/></Field>
       <Field label="사번"><FI value={empId} onChange={e=>setEmpId(e.target.value)} placeholder="예: EMP001" onKeyDown={e=>e.key==="Enter"&&submit()}/></Field>
       <Field label={isOn?"입사일":"퇴사일"}><FI type="date" value={date} onChange={e=>setDate(e.target.value)}/></Field>
-      {err&&<p style={{color:"#E84545",fontSize:13,margin:0,background:"#fff0f0",padding:"8px 12px",borderRadius:8}}>{err}</p>}
+      {err&&<p style={{color:"#e5484d",fontSize:13,margin:0,background:"#fff0f0",padding:"8px 12px",borderRadius:8}}>{err}</p>}
       <button onClick={submit} disabled={loading}
         style={{width:"100%",padding:"14px",borderRadius:14,border:"none",background:accentGrad,
           color:"#fff",fontSize:14,fontWeight:700,cursor:loading?"not-allowed":"pointer",
-          fontFamily:"inherit",opacity:loading?.6:1,boxShadow:"0 4px 14px rgba(100,80,200,.25)"}}>
+          fontFamily:"inherit",opacity:loading?.6:1,boxShadow:"0 4px 14px rgba(37,99,235,.25)"}}>
         {loading?"확인 중...":"체크리스트 열기 →"}
       </button>
     </div>
@@ -407,7 +407,7 @@ function UserChecklist({employee,onBack}){
     {key:"all",    icon:"📬", label:"전체",  count:cntAll,    color:"#fff", activeBg:"rgba(255,255,255,.25)"},
     {key:"pending",icon:"⏳", label:"검토중", count:cntPending,color:"#F5A623", activeBg:"rgba(245,166,35,.22)"},
     {key:"approved",icon:"✅",label:"승인됨", count:cntApproved,color:"#27AE60",activeBg:"rgba(39,174,96,.22)"},
-    {key:"rejected",icon:"❌",label:"반려됨", count:cntRejected,color:"#E84545",activeBg:"rgba(232,69,69,.22)"},
+    {key:"rejected",icon:"❌",label:"반려됨", count:cntRejected,color:"#e5484d",activeBg:"rgba(232,69,69,.22)"},
   ];
 
   const filteredReqs = extReqs.slice().reverse().filter(r=>{
@@ -418,9 +418,9 @@ function UserChecklist({employee,onBack}){
     return false;
   });
 
-  return(<div style={{minHeight:"100vh",background:"linear-gradient(135deg,#e8e4ff,#f5f3ff,#e4f0ff)",fontFamily:"'Pretendard',sans-serif"}}>
+  return(<div style={{minHeight:"100vh",background:"radial-gradient(1000px 480px at 85% -10%,#d5e8ff 0%,transparent 60%),radial-gradient(900px 420px at -10% 0%,#dbf1ff 0%,transparent 55%),#f2f5fb",fontFamily:"'Pretendard',sans-serif"}}>
     {/* Header */}
-    <div style={{background:"linear-gradient(135deg,#5B6EEA,#7c5ce8)",padding:"24px 28px",color:"#fff"}}>
+    <div style={{background:"linear-gradient(135deg,#2563eb,#38bdf8)",padding:"24px 28px",color:"#fff"}}>
       <div style={{maxWidth:780,margin:"0 auto"}}>
         <button onClick={onBack}
           onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,.25)"}
@@ -464,7 +464,7 @@ function UserChecklist({employee,onBack}){
 
     {/* Extension panel — appears below header when a tab is active */}
     {extPanel!==null&&cntAll>0&&(
-      <div style={{background:"rgba(255,255,255,.85)",backdropFilter:"blur(8px)",borderBottom:"1.5px solid rgba(91,110,234,.15)"}}>
+      <div style={{background:"rgba(255,255,255,.85)",backdropFilter:"blur(8px)",borderBottom:"1.5px solid rgba(37,99,235,.15)"}}>
         <div style={{maxWidth:780,margin:"0 auto",padding:"16px 24px"}}>
           {/* Tab row */}
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14,flexWrap:"wrap",gap:8}}>
@@ -473,32 +473,32 @@ function UserChecklist({employee,onBack}){
               {EXT_TABS.map(tab=>(
                 <button key={tab.key} onClick={()=>handleTabClick(tab.key)}
                   style={{background:extPanel===tab.key?tab.color+"22":"#f4f7fb",
-                    color:extPanel===tab.key?tab.color:"#8899bb",
-                    border:`1.5px solid ${extPanel===tab.key?tab.color+"60":"#e2e8f0"}`,
+                    color:extPanel===tab.key?tab.color:"#66718c",
+                    border:`1.5px solid ${extPanel===tab.key?tab.color+"60":"#e3e9f2"}`,
                     borderRadius:99,padding:"3px 12px",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit",transition:"all .15s"}}>
                   {tab.icon} {tab.label} ({tab.count})
                 </button>
               ))}
             </div>
-            <button onClick={()=>setExtPanel(null)} style={{background:"transparent",border:"none",color:"#8899bb",fontSize:13,cursor:"pointer",fontFamily:"inherit",fontWeight:600}}>✕ 닫기</button>
+            <button onClick={()=>setExtPanel(null)} style={{background:"transparent",border:"none",color:"#66718c",fontSize:13,cursor:"pointer",fontFamily:"inherit",fontWeight:600}}>✕ 닫기</button>
           </div>
           {/* Content */}
           {filteredReqs.length===0?(
             <div style={{textAlign:"center",color:"#bbb",fontSize:13,padding:"14px 0"}}>해당 항목이 없습니다.</div>
           ):filteredReqs.map(r=>{
-            const si={pending:["⏳ 검토중","#F5A623"],approved:["✅ 승인됨","#27AE60"],rejected:["❌ 반려됨","#E84545"]}[r.status];
+            const si={pending:["⏳ 검토중","#F5A623"],approved:["✅ 승인됨","#27AE60"],rejected:["❌ 반려됨","#e5484d"]}[r.status];
             return(<div key={r.id} style={{background:"#fff",borderRadius:12,padding:"13px 16px",marginBottom:8,boxShadow:"0 2px 10px rgba(0,0,0,.06)"}}>
               <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
                 <Badge text={si[0]} color={si[1]}/>
-                <span style={{fontWeight:700,fontSize:13,color:"#1a2233",flex:1}}>{r.itemLabel}</span>
+                <span style={{fontWeight:700,fontSize:13,color:"#151c2e",flex:1}}>{r.itemLabel}</span>
                 {r.status==="approved"&&<Badge text={`${fmtD(r.currentDue+r.requestDays)} (연장 확정)`} color="#27AE60"/>}
                 {r.status==="rejected"&&r.rejectReason&&(
-  <div style={{fontSize:12,color:"#E84545",marginTop:4,background:"#fff0f0",borderRadius:7,padding:"6px 10px"}}>
+  <div style={{fontSize:12,color:"#e5484d",marginTop:4,background:"#fff0f0",borderRadius:7,padding:"6px 10px"}}>
     💬 반려 사유: {r.rejectReason}
   </div>
 )}
               </div>
-              <div style={{fontSize:12,color:"#8899bb",marginTop:6}}>요청: {fmtD(r.currentDue)} → {fmtD(r.currentDue+r.requestDays)} ({r.requestDays}일 연장)</div>
+              <div style={{fontSize:12,color:"#66718c",marginTop:6}}>요청: {fmtD(r.currentDue)} → {fmtD(r.currentDue+r.requestDays)} ({r.requestDays}일 연장)</div>
               <div style={{fontSize:12,color:"#6b7a99",marginTop:3,fontStyle:"italic"}}>사유: {r.reason}</div>
               <div style={{fontSize:11,color:"#bbb",marginTop:3}}>{fmtDT(r.createdAt)}</div>
             </div>);
@@ -510,11 +510,11 @@ function UserChecklist({employee,onBack}){
     <div style={{maxWidth:780,margin:"0 auto",padding:"24px 16px"}}>
       {tpl.map(cat=>{
         const catDone=cat.items.filter(i=>checks[i.id]).length;
-        return(<div key={cat.id} style={{background:"#fff",borderRadius:16,marginBottom:20,overflow:"hidden",boxShadow:"0 4px 20px rgba(91,110,234,.1)"}}>
-          <div style={{padding:"14px 18px",background:"linear-gradient(135deg,#f5f3ff,#eef0ff)",borderBottom:"1px solid rgba(91,110,234,.12)",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+        return(<div key={cat.id} style={{background:"#fff",borderRadius:16,marginBottom:20,overflow:"hidden",boxShadow:"0 4px 20px rgba(37,99,235,.1)"}}>
+          <div style={{padding:"14px 18px",background:"linear-gradient(135deg,#eef4ff,#eef0ff)",borderBottom:"1px solid rgba(37,99,235,.12)",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
             <div style={{display:"flex",alignItems:"center",gap:10}}>
               <div style={{width:4,height:20,background:cat.color,borderRadius:2}}/>
-              <span style={{fontWeight:700,fontSize:15,color:"#1a2233"}}>{cat.category}</span>
+              <span style={{fontWeight:700,fontSize:15,color:"#151c2e"}}>{cat.category}</span>
               <Badge text={cat.dueDays < 0 ? `D${cat.dueDays}` : `D+${cat.dueDays}`} color={cat.color}/>
             </div>
             <span style={{fontSize:13,color:"#6b7a99",fontWeight:600}}>{catDone}/{cat.items.length}</span>
@@ -533,17 +533,17 @@ function UserChecklist({employee,onBack}){
                   background:done?"#f6fff9":over?"#fff8f8":"#fff",borderBottom:note?"none":"1px solid #f4f7fa",transition:"background .15s"}}
                 onMouseEnter={e=>e.currentTarget.style.background=done?"#edfbf3":over?"#fff0f0":"#f8faff"}
                 onMouseLeave={e=>e.currentTarget.style.background=done?"#f6fff9":over?"#fff8f8":"#fff"}>
-                <div style={{width:22,height:22,borderRadius:6,flexShrink:0,border:`2px solid ${done?"#27AE60":over?"#E84545":"#cdd8e8"}`,background:done?"#27AE60":"transparent",display:"flex",alignItems:"center",justifyContent:"center",transition:"all .2s"}}>
+                <div style={{width:22,height:22,borderRadius:6,flexShrink:0,border:`2px solid ${done?"#27AE60":over?"#e5484d":"#cdd8e8"}`,background:done?"#27AE60":"transparent",display:"flex",alignItems:"center",justifyContent:"center",transition:"all .2s"}}>
                   {done&&<span style={{color:"#fff",fontSize:13,fontWeight:700}}>✓</span>}
                 </div>
-                <span style={{fontSize:14,color:done?"#6b8c7a":"#1a2233",textDecoration:done?"line-through":"none",flex:1}}>{item.label}</span>
+                <span style={{fontSize:14,color:done?"#6b8c7a":"#151c2e",textDecoration:done?"line-through":"none",flex:1}}>{item.label}</span>
                 {approvedReq&&hasOverride&&<Badge text={`✅ 연장: ${fmtD(effDue)}`} color="#27AE60"/>}
                 {!approvedReq&&hasOverride&&<Badge text={`${fmtD(effDue)} (연장)`} color="#27AE60"/>}
-                {over&&!done&&<Badge text="기한초과" color="#E84545"/>}
+                {over&&!done&&<Badge text="기한초과" color="#e5484d"/>}
                 {pendingReq&&<Badge text="연장요청중" color="#F5A623"/>}
                 {!done&&!pendingReq&&(
                   <SBtn onClick={e=>{e.stopPropagation();setExtModal({item,catDueDays:cat.dueDays});}}
-                    bg={over?"#FFF3CD":"#f0f4fa"} hoverBg={over?"#ffe8a0":"#e4eaf8"} color={over?"#9a7020":"#8899bb"} style={{fontSize:11}}>⏰ 기한연장요청</SBtn>
+                    bg={over?"#FFF3CD":"#f0f4fa"} hoverBg={over?"#ffe8a0":"#e4eaf8"} color={over?"#9a7020":"#66718c"} style={{fontSize:11}}>⏰ 기한연장요청</SBtn>
                 )}
                 <AttachBtn itemId={item.id} empId={employee.id} prefix="on"/>
               </div>
@@ -560,7 +560,7 @@ function UserChecklist({employee,onBack}){
           })}
         </div>);
       })}
-      {pct===100&&(<div style={{background:"linear-gradient(135deg,#5B6EEA,#7c5ce8)",borderRadius:16,padding:"24px",color:"#fff",textAlign:"center"}}>
+      {pct===100&&(<div style={{background:"linear-gradient(135deg,#2563eb,#38bdf8)",borderRadius:16,padding:"24px",color:"#fff",textAlign:"center"}}>
         <div style={{fontSize:32,marginBottom:8}}>🎉</div>
         <div style={{fontWeight:800,fontSize:18}}>모든 온보딩 항목을 완료했습니다!</div>
         <div style={{marginTop:10}}>
@@ -581,9 +581,9 @@ function UserChecklist({employee,onBack}){
     {extModal&&(
       <Modal title="⏰ 기한 연장 요청" onClose={()=>{setExtModal(null);setExtDays("");setExtReason("");}} width={460}>
         <div style={{background:"#f8faff",borderRadius:10,padding:"12px 15px",marginBottom:16}}>
-          <div style={{fontSize:12,color:"#8899bb",marginBottom:4}}>대상 항목</div>
-          <div style={{fontWeight:700,fontSize:14,color:"#1a2233"}}>{extModal.item.label}</div>
-          <div style={{fontSize:12,color:"#8899bb",marginTop:4}}>현재 기한: {fmtD(getEffDue(extModal.item.id,extModal.catDueDays,itemOverrides))}</div>
+          <div style={{fontSize:12,color:"#66718c",marginBottom:4}}>대상 항목</div>
+          <div style={{fontWeight:700,fontSize:14,color:"#151c2e"}}>{extModal.item.label}</div>
+          <div style={{fontSize:12,color:"#66718c",marginTop:4}}>현재 기한: {fmtD(getEffDue(extModal.item.id,extModal.catDueDays,itemOverrides))}</div>
         </div>
         <Field label="연장 요청 일수">
           <FI type="number" value={extDays} onChange={e=>setExtDays(e.target.value)} placeholder="예: 3"/>
@@ -593,13 +593,13 @@ function UserChecklist({employee,onBack}){
         </Field>
         <Field label="연장 사유 (필수)">
           <textarea value={extReason} onChange={e=>setExtReason(e.target.value)} placeholder="연장이 필요한 사유를 상세히 입력해주세요."
-            style={{width:"100%",height:100,padding:"10px 13px",borderRadius:9,border:"1.5px solid #e2e8f0",fontSize:13,outline:"none",boxSizing:"border-box",resize:"vertical",fontFamily:"inherit",lineHeight:1.6}}/>
+            style={{width:"100%",height:100,padding:"10px 13px",borderRadius:9,border:"1.5px solid #e3e9f2",fontSize:13,outline:"none",boxSizing:"border-box",resize:"vertical",fontFamily:"inherit",lineHeight:1.6}}/>
         </Field>
-        <div style={{background:"#f0f8ff",border:"1px solid #2E86DE30",borderRadius:8,padding:"9px 13px",fontSize:12,color:"#2E86DE",marginBottom:16}}>
+        <div style={{background:"#f0f8ff",border:"1px solid #2563eb30",borderRadius:8,padding:"9px 13px",fontSize:12,color:"#2563eb",marginBottom:16}}>
           ℹ️ 요청 후 인사팀 검토를 거쳐 승인/반려 처리됩니다.
         </div>
         <div style={{display:"flex",gap:10}}>
-          <PBtn onClick={submitExt} color="#2E86DE" style={{flex:1}}>요청 보내기</PBtn>
+          <PBtn onClick={submitExt} color="#2563eb" style={{flex:1}}>요청 보내기</PBtn>
           <OBtn onClick={()=>{setExtModal(null);setExtDays("");setExtReason("");}} style={{flex:1}}>취소</OBtn>
         </div>
       </Modal>
@@ -615,21 +615,21 @@ function AdminLogin({onLogin,onBack}){
   function submit(){if(pw==="admin1234")onLogin();else setErr("비밀번호가 올바르지 않습니다. (힌트: admin1234)");}
   return(<div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Pretendard',sans-serif",position:"relative",padding:"16px"}}>
     {/* 홈화면과 동일한 배경 */}
-    <div style={{position:"fixed",inset:0,background:"linear-gradient(135deg,#e8e4ff 0%,#f5f3ff 50%,#e4f0ff 100%)",zIndex:0}}>
+    <div style={{position:"fixed",inset:0,background:"radial-gradient(1000px 480px at 85% -10%,#d5e8ff 0%,transparent 60%),radial-gradient(900px 420px at -10% 0%,#dbf1ff 0%,transparent 55%),#f2f5fb",zIndex:0}}>
       <div style={{position:"absolute",top:32,left:32,width:72,height:72,borderRadius:18,background:"rgba(130,100,255,.18)"}}/>
       <div style={{position:"absolute",top:28,right:36,width:60,height:60,borderRadius:16,background:"rgba(100,200,190,.18)"}}/>
       <div style={{position:"absolute",bottom:36,left:40,width:52,height:52,borderRadius:14,background:"rgba(255,120,120,.18)"}}/>
       <div style={{position:"absolute",bottom:30,right:32,width:64,height:64,borderRadius:18,background:"rgba(140,100,255,.18)"}}/>
     </div>
-    <div style={{background:"#fff",borderRadius:28,boxShadow:"0 8px 48px rgba(100,80,200,.13)",padding:"44px 40px 36px",width:"100%",maxWidth:380,position:"relative",zIndex:1,boxSizing:"border-box"}}>
+    <div style={{background:"#fff",borderRadius:28,boxShadow:"0 8px 48px rgba(37,99,235,.13)",padding:"44px 40px 36px",width:"100%",maxWidth:380,position:"relative",zIndex:1,boxSizing:"border-box"}}>
       <div style={{textAlign:"center",marginBottom:28}}>
-        <div style={{width:56,height:56,background:"linear-gradient(135deg,#7c5ce8,#a084ee)",borderRadius:16,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 14px",fontSize:24}}>🔐</div>
-        <div style={{fontSize:11,fontWeight:700,letterSpacing:"3px",color:"#a084ee",marginBottom:6}}>BI MATRIX</div>
-        <h2 style={{fontWeight:800,fontSize:20,color:"#1a1a2e",margin:0}}>관리자 로그인</h2>
+        <div style={{width:56,height:56,background:"linear-gradient(135deg,#38bdf8,#38bdf8)",borderRadius:16,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 14px",fontSize:24}}>🔐</div>
+        <div style={{fontSize:11,fontWeight:700,letterSpacing:"3px",color:"#38bdf8",marginBottom:6}}>BI MATRIX</div>
+        <h2 style={{fontWeight:800,fontSize:20,color:"#151c2e",margin:0}}>관리자 로그인</h2>
       </div>
       <FI type="password" value={pw} onChange={e=>setPw(e.target.value)} placeholder="비밀번호 입력" style={{marginBottom:10}} onKeyDown={e=>e.key==="Enter"&&submit()}/>
-      {err&&<p style={{color:"#E84545",fontSize:13,margin:"0 0 10px",background:"#fff0f0",padding:"8px 12px",borderRadius:8}}>{err}</p>}
-      <button onClick={submit} style={{width:"100%",padding:"14px",borderRadius:14,border:"none",background:"linear-gradient(135deg,#5B6EEA,#7c5ce8)",color:"#fff",fontSize:14,fontWeight:700,cursor:"pointer",fontFamily:"inherit",boxShadow:"0 4px 14px rgba(100,80,200,.25)",marginBottom:10}}>로그인</button>
+      {err&&<p style={{color:"#e5484d",fontSize:13,margin:"0 0 10px",background:"#fff0f0",padding:"8px 12px",borderRadius:8}}>{err}</p>}
+      <button onClick={submit} style={{width:"100%",padding:"14px",borderRadius:14,border:"none",background:"linear-gradient(135deg,#2563eb,#38bdf8)",color:"#fff",fontSize:14,fontWeight:700,cursor:"pointer",fontFamily:"inherit",boxShadow:"0 4px 14px rgba(37,99,235,.25)",marginBottom:10}}>로그인</button>
       <button onClick={onBack} style={{width:"100%",padding:"13px",borderRadius:14,border:"1.5px solid #e2e4f0",background:"#fff",color:"#6b6b8a",fontSize:14,fontWeight:600,cursor:"pointer",fontFamily:"inherit"}}>← 돌아가기</button>
     </div>
   </div>);
@@ -653,8 +653,8 @@ function SurveyModal({onClose,onSubmit,type="on",initialData=null}){
     <Modal title={type==="on"?"📋 입사 온보딩 완료 설문":"📋 퇴사 체크리스트 완료 설문"} onClose={onClose} width={520}>
       <div style={{textAlign:"center",marginBottom:20}}>
         <div style={{fontSize:40,marginBottom:8}}>{type==="on"?"🎉":"✅"}</div>
-        <div style={{fontSize:15,fontWeight:700,color:"#1a2233",marginBottom:4}}>모든 항목을 완료하셨습니다!</div>
-        <div style={{fontSize:13,color:"#8899bb",lineHeight:1.6}}>짧은 설문에 응해주시면 더 나은 {type==="on"?"온보딩":"퇴사 처리"} 경험을 만드는 데 도움이 됩니다.</div>
+        <div style={{fontSize:15,fontWeight:700,color:"#151c2e",marginBottom:4}}>모든 항목을 완료하셨습니다!</div>
+        <div style={{fontSize:13,color:"#66718c",lineHeight:1.6}}>짧은 설문에 응해주시면 더 나은 {type==="on"?"온보딩":"퇴사 처리"} 경험을 만드는 데 도움이 됩니다.</div>
       </div>
       <Field label="전반적인 만족도 ★">
         <div style={{display:"flex",justifyContent:"center",gap:2,marginBottom:4}}>
@@ -667,18 +667,18 @@ function SurveyModal({onClose,onSubmit,type="on",initialData=null}){
       </Field>
       <Field label="도움이 된 부분">
         <textarea value={helpful} onChange={e=>setHelpful(e.target.value)} placeholder="어떤 부분이 특히 도움이 되었나요?" rows={3}
-          style={{width:"100%",padding:"10px 13px",borderRadius:9,border:"1.5px solid #e2e8f0",fontSize:13,outline:"none",resize:"none",fontFamily:"inherit",boxSizing:"border-box",lineHeight:1.6}}/>
+          style={{width:"100%",padding:"10px 13px",borderRadius:9,border:"1.5px solid #e3e9f2",fontSize:13,outline:"none",resize:"none",fontFamily:"inherit",boxSizing:"border-box",lineHeight:1.6}}/>
       </Field>
       <Field label="개선이 필요한 부분">
         <textarea value={improve} onChange={e=>setImprove(e.target.value)} placeholder="불편하거나 개선이 필요한 점을 알려주세요." rows={3}
-          style={{width:"100%",padding:"10px 13px",borderRadius:9,border:"1.5px solid #e2e8f0",fontSize:13,outline:"none",resize:"none",fontFamily:"inherit",boxSizing:"border-box",lineHeight:1.6}}/>
+          style={{width:"100%",padding:"10px 13px",borderRadius:9,border:"1.5px solid #e3e9f2",fontSize:13,outline:"none",resize:"none",fontFamily:"inherit",boxSizing:"border-box",lineHeight:1.6}}/>
       </Field>
       <Field label="기타 의견">
         <textarea value={other} onChange={e=>setOther(e.target.value)} placeholder="자유롭게 의견을 남겨주세요." rows={2}
-          style={{width:"100%",padding:"10px 13px",borderRadius:9,border:"1.5px solid #e2e8f0",fontSize:13,outline:"none",resize:"none",fontFamily:"inherit",boxSizing:"border-box",lineHeight:1.6}}/>
+          style={{width:"100%",padding:"10px 13px",borderRadius:9,border:"1.5px solid #e3e9f2",fontSize:13,outline:"none",resize:"none",fontFamily:"inherit",boxSizing:"border-box",lineHeight:1.6}}/>
       </Field>
       <div style={{marginTop:8}}>
-        <button onClick={submit} style={{width:"100%",background:"linear-gradient(135deg,#5B6EEA,#7c5ce8)",color:"#fff",border:"none",borderRadius:10,padding:"12px 18px",fontSize:14,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>설문 제출</button>
+        <button onClick={submit} style={{width:"100%",background:"linear-gradient(135deg,#2563eb,#38bdf8)",color:"#fff",border:"none",borderRadius:10,padding:"12px 18px",fontSize:14,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>설문 제출</button>
       </div>
     </Modal>
   );
@@ -725,7 +725,7 @@ function AttachBtn({itemId, empId, prefix}){
     {att?(
       <>
         <SBtn onClick={()=>setDlModal(true)} bg="#e8f5e9" color="#27AE60" style={{fontSize:11,padding:"3px 8px"}} title={`${att.name} (${(att.size/1024).toFixed(0)}KB)`}>📎</SBtn>
-        <SBtn onClick={delFile} bg="#fff0f0" color="#E84545" style={{fontSize:10,padding:"3px 5px"}}>✕</SBtn>
+        <SBtn onClick={delFile} bg="#fff0f0" color="#e5484d" style={{fontSize:10,padding:"3px 5px"}}>✕</SBtn>
       </>
     ):(
       <label style={{cursor:"pointer",display:"inline-block"}}>
@@ -736,14 +736,14 @@ function AttachBtn({itemId, empId, prefix}){
     {dlModal&&(
       <Modal title="🔒 파일 다운로드" onClose={()=>{setDlModal(false);setDlPw("");setDlErr("");}}>
         <div style={{background:"#f8faff",borderRadius:8,padding:"10px 14px",marginBottom:14}}>
-          <div style={{fontSize:11,color:"#8899bb",marginBottom:2}}>첨부 파일</div>
-          <div style={{fontWeight:700,color:"#1a2233",fontSize:13}}>{att.name}</div>
-          <div style={{fontSize:11,color:"#8899bb",marginTop:2}}>{(att.size/1024).toFixed(0)} KB · {fmtDT(att.uploadedAt)}</div>
+          <div style={{fontSize:11,color:"#66718c",marginBottom:2}}>첨부 파일</div>
+          <div style={{fontWeight:700,color:"#151c2e",fontSize:13}}>{att.name}</div>
+          <div style={{fontSize:11,color:"#66718c",marginTop:2}}>{(att.size/1024).toFixed(0)} KB · {fmtDT(att.uploadedAt)}</div>
         </div>
         <Field label="관리자 비밀번호">
           <FI type="password" value={dlPw} onChange={e=>{setDlPw(e.target.value);setDlErr("");}} placeholder="비밀번호를 입력하세요" onKeyDown={e=>e.key==="Enter"&&download()}/>
         </Field>
-        {dlErr&&<div style={{color:"#E84545",fontSize:12,marginTop:4}}>{dlErr}</div>}
+        {dlErr&&<div style={{color:"#e5484d",fontSize:12,marginTop:4}}>{dlErr}</div>}
         <div style={{display:"flex",gap:10,marginTop:14}}>
           <PBtn onClick={download} style={{flex:1}}>⬇ 다운로드</PBtn>
           <OBtn onClick={()=>{setDlModal(false);setDlPw("");setDlErr("");}} style={{flex:1}}>취소</OBtn>
@@ -775,7 +775,7 @@ function AdminDetail({employee:initEmp,checks:initChecks,tpl:initTpl,onBack}){
   const [addItemCatId,setAddItemCatId]=useState(null);
   const [newItemLabel,setNewItemLabel]=useState("");
   const [addCatModal,setAddCatModal]=useState(false);
-  const [newCat,setNewCat]=useState({category:"",dueDays:0,color:"#2E86DE"});
+  const [newCat,setNewCat]=useState({category:"",dueDays:0,color:"#2563eb"});
   const [editCatId,setEditCatId]=useState(null);
   const [editCatVal,setEditCatVal]=useState("");
   const [editItemId,setEditItemId]=useState(null);
@@ -877,7 +877,7 @@ const [rejectReason,setRejectReason]=useState("");
   function applyAddCat(){
     if(!newCat.category.trim()){toast("카테고리명을 입력하세요.","warning");return;}
     updTpl([...tpl,{id:uid(),category:newCat.category.trim(),dueDays:parseInt(newCat.dueDays)||0,color:newCat.color,items:[]}]);
-    setAddCatModal(false); setNewCat({category:"",dueDays:0,color:"#2E86DE"});
+    setAddCatModal(false); setNewCat({category:"",dueDays:0,color:"#2563eb"});
   }
   function applyRenameCat(){updTpl(tpl.map(c=>c.id===editCatId?{...c,category:editCatVal}:c));setEditCatId(null);}
   function applyEditItemLabel(catId){
@@ -963,10 +963,10 @@ async function submitReject(){
 
  const cntRejectedExt=extReqs.filter(r=>r.status==="rejected").length;
   const EXT_TABS_ADMIN=[
-    {key:"all",    icon:"📬", label:"전체",  count:cntAllExt,      color:"#5B6EEA", activeBg:"rgba(91,110,234,.15)"},
+    {key:"all",    icon:"📬", label:"전체",  count:cntAllExt,      color:"#2563eb", activeBg:"rgba(37,99,235,.15)"},
     {key:"pending",icon:"⏳", label:"검토중", count:cntPendingExt,  color:"#F5A623", activeBg:"rgba(245,166,35,.15)"},
     {key:"approved",icon:"✅",label:"승인됨", count:cntApprovedExt, color:"#27AE60", activeBg:"rgba(39,174,96,.15)"},
-    {key:"rejected",icon:"❌",label:"반려됨", count:cntRejectedExt, color:"#E84545", activeBg:"rgba(232,69,69,.15)"},
+    {key:"rejected",icon:"❌",label:"반려됨", count:cntRejectedExt, color:"#e5484d", activeBg:"rgba(232,69,69,.15)"},
   ];
 const filteredExtReqs=extReqs.slice().reverse().filter(r=>{
     if(extPanel==="all")return true;
@@ -976,10 +976,10 @@ const filteredExtReqs=extReqs.slice().reverse().filter(r=>{
     return false;
   });
 
-  return(<div style={{minHeight:"100vh",background:"linear-gradient(135deg,#e8e4ff,#f5f3ff,#e4f0ff)",fontFamily:"'Pretendard',sans-serif"}}>
+  return(<div style={{minHeight:"100vh",background:"radial-gradient(1000px 480px at 85% -10%,#d5e8ff 0%,transparent 60%),radial-gradient(900px 420px at -10% 0%,#dbf1ff 0%,transparent 55%),#f2f5fb",fontFamily:"'Pretendard',sans-serif"}}>
 
     {/* ── HEADER ── */}
-    <div style={{background:"linear-gradient(135deg,#5B6EEA,#7c5ce8)",padding:"16px 22px",color:"#fff"}}>
+    <div style={{background:"linear-gradient(135deg,#2563eb,#38bdf8)",padding:"16px 22px",color:"#fff"}}>
       <div style={{maxWidth:960,margin:"0 auto"}}>
 
         {/* Top bar: back | action icons */}
@@ -1017,8 +1017,8 @@ const filteredExtReqs=extReqs.slice().reverse().filter(r=>{
               {editJoinDate?(
                 <>
                   <input type="date" value={newJoinDate} onChange={e=>setNewJoinDate(e.target.value)}
-                    style={{padding:"4px 9px",borderRadius:7,border:"1.5px solid #5B6EEA",fontSize:12,outline:"none",background:"#fff",color:"#1a2233"}}/>
-                  <SBtn onClick={applyJoinDate} bg="#5B6EEA" color="#fff" style={{fontSize:11}}>저장</SBtn>
+                    style={{padding:"4px 9px",borderRadius:7,border:"1.5px solid #2563eb",fontSize:12,outline:"none",background:"#fff",color:"#151c2e"}}/>
+                  <SBtn onClick={applyJoinDate} bg="#2563eb" color="#fff" style={{fontSize:11}}>저장</SBtn>
                   <SBtn onClick={()=>{setEditJoinDate(false);setNewJoinDate(emp.joinDate);}} bg="rgba(255,255,255,.15)" color="#fff" style={{fontSize:11}}>취소</SBtn>
                 </>
               ):(
@@ -1035,37 +1035,37 @@ const filteredExtReqs=extReqs.slice().reverse().filter(r=>{
 
     {/* ── Extension Requests Panel ── */}
     {extPanel!==null&&(
-      <div style={{background:"rgba(255,255,255,.85)",backdropFilter:"blur(8px)",borderBottom:"1.5px solid rgba(91,110,234,.15)"}}>
+      <div style={{background:"rgba(255,255,255,.85)",backdropFilter:"blur(8px)",borderBottom:"1.5px solid rgba(37,99,235,.15)"}}>
         <div style={{maxWidth:960,margin:"0 auto",padding:"14px 22px"}}>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12,flexWrap:"wrap",gap:8}}>
             <div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap"}}>
               <span style={{fontWeight:700,fontSize:13,color:"#9a7020"}}>📬 기한 연장 요청 현황</span>
               {EXT_TABS_ADMIN.map(tab=>(
                 <button key={tab.key} onClick={()=>handleExtTabClick(tab.key)}
-                  style={{background:extPanel===tab.key?tab.color+"22":"#f4f7fb",color:extPanel===tab.key?tab.color:"#8899bb",
-                    border:`1.5px solid ${extPanel===tab.key?tab.color+"60":"#e2e8f0"}`,borderRadius:99,
+                  style={{background:extPanel===tab.key?tab.color+"22":"#f4f7fb",color:extPanel===tab.key?tab.color:"#66718c",
+                    border:`1.5px solid ${extPanel===tab.key?tab.color+"60":"#e3e9f2"}`,borderRadius:99,
                     padding:"3px 10px",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>
                   {tab.icon} {tab.label} ({tab.count})
                 </button>
               ))}
             </div>
-            <button onClick={()=>setExtPanel(null)} style={{background:"transparent",border:"none",color:"#8899bb",fontSize:12,cursor:"pointer",fontFamily:"inherit",fontWeight:600}}>✕ 닫기</button>
+            <button onClick={()=>setExtPanel(null)} style={{background:"transparent",border:"none",color:"#66718c",fontSize:12,cursor:"pointer",fontFamily:"inherit",fontWeight:600}}>✕ 닫기</button>
           </div>
           {filteredExtReqs.length===0&&<div style={{fontSize:13,color:"#bbb",textAlign:"center",padding:"12px 0"}}>해당 항목이 없습니다.</div>}
           {filteredExtReqs.map(r=>{
-            const si={pending:["⏳ 검토중","#F5A623"],approved:["✅ 승인됨","#27AE60"],rejected:["❌ 반려됨","#E84545"]}[r.status];
+            const si={pending:["⏳ 검토중","#F5A623"],approved:["✅ 승인됨","#27AE60"],rejected:["❌ 반려됨","#e5484d"]}[r.status];
             return(<div key={r.id} style={{background:"#fff",borderRadius:12,padding:"13px 16px",marginBottom:8,boxShadow:"0 2px 8px rgba(0,0,0,.05)",display:"flex",alignItems:"flex-start",gap:12,flexWrap:"wrap"}}>
               <Badge text={si[0]} color={si[1]}/>
               <div style={{flex:1,minWidth:180}}>
-                <div style={{fontWeight:700,fontSize:13,color:"#1a2233",marginBottom:2}}>{r.itemLabel}</div>
+                <div style={{fontWeight:700,fontSize:13,color:"#151c2e",marginBottom:2}}>{r.itemLabel}</div>
                 <div style={{fontSize:12,color:"#6b7a99"}}>{fmtD(r.currentDue)} → {fmtD(r.currentDue+r.requestDays)} ({r.requestDays}일 연장 요청)</div>
-                <div style={{fontSize:12,color:"#8899bb",marginTop:2,fontStyle:"italic"}}>사유: {r.reason}</div>
+                <div style={{fontSize:12,color:"#66718c",marginTop:2,fontStyle:"italic"}}>사유: {r.reason}</div>
                 <div style={{fontSize:11,color:"#bbb",marginTop:2}}>{fmtDT(r.createdAt)}{r.reviewedAt&&` · 검토: ${fmtDT(r.reviewedAt)}`}</div>
               </div>
               {r.status==="pending"&&(
                 <div style={{display:"flex",gap:7}}>
                   <SBtn onClick={()=>handleExtReq(r.id,"approved")} bg="#e8f5e9" color="#27AE60" style={{padding:"5px 12px",fontSize:12}}>✅ 승인</SBtn>
-                  <SBtn onClick={()=>handleExtReq(r.id,"rejected")} bg="#fff0f0" color="#E84545" style={{padding:"5px 12px",fontSize:12}}>❌ 반려</SBtn>
+                  <SBtn onClick={()=>handleExtReq(r.id,"rejected")} bg="#fff0f0" color="#e5484d" style={{padding:"5px 12px",fontSize:12}}>❌ 반려</SBtn>
                 </div>
               )}
             </div>);
@@ -1075,21 +1075,21 @@ const filteredExtReqs=extReqs.slice().reverse().filter(r=>{
     )}
 
     {/* ── STICKY TOOLBAR ── */}
-    <div style={{position:"sticky",top:0,zIndex:100,background:"rgba(255,255,255,.92)",backdropFilter:"blur(8px)",borderBottom:"1.5px solid rgba(91,110,234,.15)",boxShadow:"0 2px 12px rgba(91,110,234,.1)"}}>
+    <div style={{position:"sticky",top:0,zIndex:100,background:"rgba(255,255,255,.92)",backdropFilter:"blur(8px)",borderBottom:"1.5px solid rgba(37,99,235,.15)",boxShadow:"0 2px 12px rgba(37,99,235,.1)"}}>
       <div style={{maxWidth:960,margin:"0 auto",padding:"6px 14px",display:"flex",alignItems:"center",gap:4,flexWrap:"wrap"}}>
-        <div style={{fontSize:11,color:"#8899bb",fontWeight:600,marginRight:6,borderRight:"1.5px solid #e8ecf0",paddingRight:10,flex:1,minWidth:120}}>
-          {selectedItem?<span style={{color:"#2E86DE"}}>✅ <strong>{selectedItem.label.slice(0,26)}{selectedItem.label.length>26?"…":""}</strong> 선택됨</span>
+        <div style={{fontSize:11,color:"#66718c",fontWeight:600,marginRight:6,borderRight:"1.5px solid #e8ecf0",paddingRight:10,flex:1,minWidth:120}}>
+          {selectedItem?<span style={{color:"#2563eb"}}>✅ <strong>{selectedItem.label.slice(0,26)}{selectedItem.label.length>26?"…":""}</strong> 선택됨</span>
             :<span>항목을 클릭하여 선택 후 아이콘을 눌러 기능을 수행하세요</span>}
         </div>
         <IBtn icon="📅" label="기한" onClick={openItemDueModal} active={toolbarActive&&itemDueModal} disabled={!toolbarActive} color="#9B59B6"/>
         <IBtn icon="💬" label="메모" onClick={openNoteFromToolbar} disabled={!toolbarActive} color="#F5A623"/>
-        <IBtn icon="✏️" label="이름수정" onClick={()=>{if(!selectedItem){toast("항목을 먼저 선택해주세요.","warning");return;} setEditItemId(selectedItem.itemId); setEditItemVal(selectedItem.label);}} disabled={!toolbarActive} color="#2E86DE"/>
-        <IBtn icon="📧" label="알림" onClick={openMailFromToolbar} disabled={!toolbarActive||!!checks[selectedItem?.itemId]} color="#E84545"/>
-        <IBtn icon="🗑" label="삭제" onClick={deleteFromToolbar} disabled={!toolbarActive} color="#E84545"/>
+        <IBtn icon="✏️" label="이름수정" onClick={()=>{if(!selectedItem){toast("항목을 먼저 선택해주세요.","warning");return;} setEditItemId(selectedItem.itemId); setEditItemVal(selectedItem.label);}} disabled={!toolbarActive} color="#2563eb"/>
+        <IBtn icon="📧" label="알림" onClick={openMailFromToolbar} disabled={!toolbarActive||!!checks[selectedItem?.itemId]} color="#e5484d"/>
+        <IBtn icon="🗑" label="삭제" onClick={deleteFromToolbar} disabled={!toolbarActive} color="#e5484d"/>
         {selectedItem&&itemOverrides[selectedItem.itemId]!==undefined&&(
           <SBtn onClick={()=>clearItemDue(selectedItem.itemId)} bg="#f3eeff" color="#9B59B6" style={{fontSize:10,marginLeft:4}}>↩️ 기한초기화</SBtn>
         )}
-        {selectedItem&&(<SBtn onClick={()=>setSelectedItem(null)} bg="#f0f4fa" color="#8899bb" style={{fontSize:10,marginLeft:"auto"}}>✕ 선택해제</SBtn>)}
+        {selectedItem&&(<SBtn onClick={()=>setSelectedItem(null)} bg="#f0f4fa" color="#66718c" style={{fontSize:10,marginLeft:"auto"}}>✕ 선택해제</SBtn>)}
       </div>
     </div>
 
@@ -1098,44 +1098,44 @@ const filteredExtReqs=extReqs.slice().reverse().filter(r=>{
       {tpl.map(cat=>{
         const catDone=cat.items.filter(i=>checks[i.id]).length;
         const overCount=cat.items.filter(i=>!checks[i.id]&&isOverdue(emp.joinDate,getEffDue(i.id,cat.dueDays,itemOverrides),false)).length;
-        return(<div key={cat.id} style={{background:"#fff",borderRadius:16,marginBottom:20,overflow:"hidden",boxShadow:"0 4px 20px rgba(91,110,234,.1)"}}>
-          <div style={{padding:"12px 16px",background:"linear-gradient(135deg,#f5f3ff,#eef0ff)",borderBottom:"1px solid rgba(91,110,234,.12)"}}>
+        return(<div key={cat.id} style={{background:"#fff",borderRadius:16,marginBottom:20,overflow:"hidden",boxShadow:"0 4px 20px rgba(37,99,235,.1)"}}>
+          <div style={{padding:"12px 16px",background:"linear-gradient(135deg,#eef4ff,#eef0ff)",borderBottom:"1px solid rgba(37,99,235,.12)"}}>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8}}>
               <div style={{display:"flex",alignItems:"center",gap:9,flex:1,minWidth:200,flexWrap:"wrap"}}>
                 <div style={{width:4,height:20,background:cat.color,borderRadius:2,flexShrink:0}}/>
                 {editCatId===cat.id?(
                   <div style={{display:"flex",gap:5,alignItems:"center"}}>
                     <input value={editCatVal} onChange={e=>setEditCatVal(e.target.value)}
-                      style={{padding:"3px 9px",borderRadius:7,border:"1.5px solid #2E86DE",fontSize:14,fontWeight:700,outline:"none",width:170}}/>
-                    <SBtn onClick={applyRenameCat} bg="#2E86DE" color="#fff">저장</SBtn>
-                    <SBtn onClick={()=>setEditCatId(null)} bg="#f0f4fa" color="#8899bb">취소</SBtn>
+                      style={{padding:"3px 9px",borderRadius:7,border:"1.5px solid #2563eb",fontSize:14,fontWeight:700,outline:"none",width:170}}/>
+                    <SBtn onClick={applyRenameCat} bg="#2563eb" color="#fff">저장</SBtn>
+                    <SBtn onClick={()=>setEditCatId(null)} bg="#f0f4fa" color="#66718c">취소</SBtn>
                   </div>
                 ):(
                   <div style={{display:"flex",alignItems:"center",gap:6}}>
-                    <span style={{fontWeight:700,fontSize:15,color:"#1a2233"}}>{cat.category}</span>
-                    <SBtn onClick={()=>{setEditCatId(cat.id);setEditCatVal(cat.category);}} bg="#f0f4fa" color="#8899bb" style={{fontSize:10}}>✏️</SBtn>
+                    <span style={{fontWeight:700,fontSize:15,color:"#151c2e"}}>{cat.category}</span>
+                    <SBtn onClick={()=>{setEditCatId(cat.id);setEditCatVal(cat.category);}} bg="#f0f4fa" color="#66718c" style={{fontSize:10}}>✏️</SBtn>
                   </div>
                 )}
                 {catDueEdit?.catId===cat.id?(
                   <div style={{display:"flex",gap:5,alignItems:"center"}}>
-                    <span style={{fontSize:12,color:"#8899bb"}}>{parseInt(catDueEdit.val)<0?"D":"D+"}</span>
+                    <span style={{fontSize:12,color:"#66718c"}}>{parseInt(catDueEdit.val)<0?"D":"D+"}</span>
                     <input type="number" value={catDueEdit.val} onChange={e=>setCatDueEdit(p=>({...p,val:e.target.value}))}
                       style={{width:68,padding:"3px 7px",borderRadius:6,border:"1.5px solid #F5A623",fontSize:12,outline:"none"}}/>
                     <SBtn onClick={applyCatDue} bg="#F5A623" color="#fff">저장</SBtn>
-                    <SBtn onClick={()=>setCatDueEdit(null)} bg="#f0f4fa" color="#8899bb">취소</SBtn>
+                    <SBtn onClick={()=>setCatDueEdit(null)} bg="#f0f4fa" color="#66718c">취소</SBtn>
                   </div>
                 ):(
                   <div style={{display:"flex",alignItems:"center",gap:5}}>
                     <Badge text={cat.dueDays < 0 ? `D${cat.dueDays}` : `D+${cat.dueDays}`} color={cat.color}/>
-                    <SBtn onClick={()=>setCatDueEdit({catId:cat.id,val:String(cat.dueDays)})} bg="#f0f4fa" color="#8899bb" style={{fontSize:10}}>✏️ 기한</SBtn>
+                    <SBtn onClick={()=>setCatDueEdit({catId:cat.id,val:String(cat.dueDays)})} bg="#f0f4fa" color="#66718c" style={{fontSize:10}}>✏️ 기한</SBtn>
                   </div>
                 )}
               </div>
               <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
-                {overCount>0&&<Badge text={`기한초과 ${overCount}개`} color="#E84545"/>}
+                {overCount>0&&<Badge text={`기한초과 ${overCount}개`} color="#e5484d"/>}
                 <span style={{fontSize:13,color:"#6b7a99",fontWeight:600}}>{catDone}/{cat.items.length}</span>
                 <SBtn onClick={()=>setAddItemCatId(cat.id)} bg="#e8f5e9" color="#27AE60">＋ 항목추가</SBtn>
-                <SBtn onClick={()=>confirmDeleteCat(cat.id)} bg="#fff0f0" color="#E84545">🗑 카테고리삭제</SBtn>
+                <SBtn onClick={()=>confirmDeleteCat(cat.id)} bg="#fff0f0" color="#e5484d">🗑 카테고리삭제</SBtn>
               </div>
             </div>
           </div>
@@ -1154,11 +1154,11 @@ const filteredExtReqs=extReqs.slice().reverse().filter(r=>{
                 style={{display:"flex",alignItems:"center",gap:9,padding:"10px 16px",
                   background:isSelected?"#f0f5ff":done?"#f6fff9":over?"#fff8f8":"#fff",
                   borderBottom:note?"none":"1px solid #f4f7fa",
-                  outline:isSelected?"2px solid #2E86DE":"none",outlineOffset:"-2px",
+                  outline:isSelected?"2px solid #2563eb":"none",outlineOffset:"-2px",
                   cursor:"pointer",transition:"background .15s"}}>
                 <div onClick={e=>{e.stopPropagation();adminToggle(item.id);}} title="관리자 체크/해제"
                   style={{width:22,height:22,borderRadius:6,flexShrink:0,cursor:"pointer",
-                    border:`2px solid ${done?"#27AE60":over?"#E84545":"#cdd8e8"}`,
+                    border:`2px solid ${done?"#27AE60":over?"#e5484d":"#cdd8e8"}`,
                     background:done?"#27AE60":"transparent",display:"flex",alignItems:"center",justifyContent:"center",transition:"all .2s",
                     boxShadow:done?"0 0 0 3px rgba(39,174,96,.15)":"none"}}>
                   {done&&<span style={{color:"#fff",fontSize:12,fontWeight:700}}>✓</span>}
@@ -1167,18 +1167,18 @@ const filteredExtReqs=extReqs.slice().reverse().filter(r=>{
                   <div style={{flex:1,display:"flex",gap:5,alignItems:"center"}} onClick={e=>e.stopPropagation()}>
                     <input value={editItemVal} onChange={e=>setEditItemVal(e.target.value)} autoFocus
                       onKeyDown={e=>e.key==="Enter"&&applyEditItemLabel(cat.id)}
-                      style={{flex:1,padding:"3px 9px",borderRadius:6,border:"1.5px solid #2E86DE",fontSize:13,outline:"none"}}/>
-                    <SBtn onClick={()=>applyEditItemLabel(cat.id)} bg="#2E86DE" color="#fff" style={{fontSize:11}}>저장</SBtn>
-                    <SBtn onClick={()=>setEditItemId(null)} bg="#f0f4fa" color="#8899bb" style={{fontSize:11}}>취소</SBtn>
+                      style={{flex:1,padding:"3px 9px",borderRadius:6,border:"1.5px solid #2563eb",fontSize:13,outline:"none"}}/>
+                    <SBtn onClick={()=>applyEditItemLabel(cat.id)} bg="#2563eb" color="#fff" style={{fontSize:11}}>저장</SBtn>
+                    <SBtn onClick={()=>setEditItemId(null)} bg="#f0f4fa" color="#66718c" style={{fontSize:11}}>취소</SBtn>
                   </div>
                 ):(
-                  <span style={{fontSize:14,color:done?"#6b8c7a":"#1a2233",textDecoration:done?"line-through":"none",flex:1}}>{item.label}</span>
+                  <span style={{fontSize:14,color:done?"#6b8c7a":"#151c2e",textDecoration:done?"line-through":"none",flex:1}}>{item.label}</span>
                 )}
                 {hasOv&&<Badge text={`${fmtD(effDue)} (개별)`} color="#9B59B6"/>}
-                {over&&!done&&<Badge text="기한초과" color="#E84545"/>}
+                {over&&!done&&<Badge text="기한초과" color="#e5484d"/>}
                 {pendingExt&&<Badge text="연장요청" color="#F5A623"/>}
                 {note&&<span title="메모 있음" style={{fontSize:14}}>💬</span>}
-                {isSelected&&<span style={{fontSize:10,color:"#2E86DE",fontWeight:700}}>선택됨</span>}
+                {isSelected&&<span style={{fontSize:10,color:"#2563eb",fontWeight:700}}>선택됨</span>}
                 <AttachBtn itemId={item.id} empId={emp.id} prefix="on"/>
               </div>
               {note&&(
@@ -1216,7 +1216,7 @@ const filteredExtReqs=extReqs.slice().reverse().filter(r=>{
       <Modal title="카테고리 추가" onClose={()=>setAddCatModal(false)}>
         <Field label="카테고리명"><FI value={newCat.category} onChange={e=>setNewCat(p=>({...p,category:e.target.value}))} placeholder="예: 수습 3개월 이내"/></Field>
         <Field label="제출기한 (입사 후 일수)"><FI type="number" value={newCat.dueDays} onChange={e=>setNewCat(p=>({...p,dueDays:e.target.value}))} placeholder="예: 90"/></Field>
-        <Field label="색상"><div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:4}}>{CAT_COLORS.map(c=><button key={c} onClick={()=>setNewCat(p=>({...p,color:c}))} style={{width:28,height:28,borderRadius:"50%",background:c,cursor:"pointer",border:newCat.color===c?"3px solid #1a2233":"2px solid transparent"}}/>)}</div></Field>
+        <Field label="색상"><div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:4}}>{CAT_COLORS.map(c=><button key={c} onClick={()=>setNewCat(p=>({...p,color:c}))} style={{width:28,height:28,borderRadius:"50%",background:c,cursor:"pointer",border:newCat.color===c?"3px solid #151c2e":"2px solid transparent"}}/>)}</div></Field>
         <div style={{display:"flex",gap:10,marginTop:16}}><PBtn onClick={applyAddCat} style={{flex:1}}>추가</PBtn><OBtn onClick={()=>setAddCatModal(false)} style={{flex:1}}>취소</OBtn></div>
       </Modal>
     )}
@@ -1224,12 +1224,12 @@ const filteredExtReqs=extReqs.slice().reverse().filter(r=>{
     {/* Bulk Due — applies ONLY to this employee via item-level overrides */}
     {bulkDueModal&&(
       <Modal title={`📅 제출기한 일괄 변경 — ${emp.name}`} onClose={()=>setBulkDueModal(false)} width={500}>
-        <div style={{background:"#f0f8ff",border:"1px solid #2E86DE20",borderRadius:8,padding:"9px 13px",fontSize:12,color:"#2E86DE",marginBottom:14}}>
+        <div style={{background:"#f0f8ff",border:"1px solid #2563eb20",borderRadius:8,padding:"9px 13px",fontSize:12,color:"#2563eb",marginBottom:14}}>
           ℹ️ 이 변경은 <strong>{emp.name}</strong> 에게만 적용됩니다. (항목별 개별 기한으로 저장)
         </div>
-        <div style={{display:"flex",gap:0,marginBottom:18,borderRadius:10,overflow:"hidden",border:"1.5px solid #e2e8f0"}}>
+        <div style={{display:"flex",gap:0,marginBottom:18,borderRadius:10,overflow:"hidden",border:"1.5px solid #e3e9f2"}}>
           {[{l:"일수 증감",v:"delta"},{l:"직접 입력",v:"absolute"}].map(t=>(
-            <button key={t.v} onClick={()=>setBulkDueMode(t.v)} style={{flex:1,padding:"10px",border:"none",cursor:"pointer",fontWeight:700,fontSize:13,fontFamily:"inherit",background:bulkDueMode===t.v?"#9B59B6":"#f8faff",color:bulkDueMode===t.v?"#fff":"#8899bb"}}>{t.l}</button>
+            <button key={t.v} onClick={()=>setBulkDueMode(t.v)} style={{flex:1,padding:"10px",border:"none",cursor:"pointer",fontWeight:700,fontSize:13,fontFamily:"inherit",background:bulkDueMode===t.v?"#9B59B6":"#f8faff",color:bulkDueMode===t.v?"#fff":"#66718c"}}>{t.l}</button>
           ))}
         </div>
         {bulkDueMode==="delta"?(
@@ -1238,10 +1238,10 @@ const filteredExtReqs=extReqs.slice().reverse().filter(r=>{
               {tpl.map(c=>{
                 const preview=parseInt(bulkDueDelta);
                 return(<div key={c.id} style={{display:"flex",justifyContent:"space-between",fontSize:13,padding:"5px 0",borderBottom:"1px solid #e8ecf0"}}>
-                  <span style={{color:"#1a2233",fontWeight:600}}>{c.category}</span>
+                  <span style={{color:"#151c2e",fontWeight:600}}>{c.category}</span>
                   <div style={{display:"flex",gap:6,alignItems:"center"}}>
                     <Badge text={fmtD(c.dueDays)} color={c.color}/>
-                    {!isNaN(preview)&&preview!==0&&<span style={{fontSize:11,color:"#8899bb"}}>→ {fmtD(c.dueDays+preview)}</span>}
+                    {!isNaN(preview)&&preview!==0&&<span style={{fontSize:11,color:"#66718c"}}>→ {fmtD(c.dueDays+preview)}</span>}
                   </div>
                 </div>);
               })}
@@ -1251,7 +1251,7 @@ const filteredExtReqs=extReqs.slice().reverse().filter(r=>{
           </>
         ):(
           <>
-            {tpl.map(c=><Field key={c.id} label={c.category}><div style={{display:"flex",alignItems:"center",gap:8}}><span style={{fontSize:13,color:"#8899bb",minWidth:24}}>D+</span><FI type="number" value={bulkDueValues[c.id]||""} onChange={e=>setBulkDueValues(p=>({...p,[c.id]:e.target.value}))}/></div></Field>)}
+            {tpl.map(c=><Field key={c.id} label={c.category}><div style={{display:"flex",alignItems:"center",gap:8}}><span style={{fontSize:13,color:"#66718c",minWidth:24}}>D+</span><FI type="number" value={bulkDueValues[c.id]||""} onChange={e=>setBulkDueValues(p=>({...p,[c.id]:e.target.value}))}/></div></Field>)}
             <div style={{display:"flex",gap:10,marginTop:4}}><PBtn onClick={applyBulkDueAbsolute} color="#9B59B6" style={{flex:1}}>적용</PBtn><OBtn onClick={()=>setBulkDueModal(false)} style={{flex:1}}>취소</OBtn></div>
           </>
         )}
@@ -1261,11 +1261,11 @@ const filteredExtReqs=extReqs.slice().reverse().filter(r=>{
     {itemDueModal&&selectedItem&&(
       <Modal title={`📅 개별 기한 변경`} onClose={()=>setItemDueModal(false)} width={400}>
         <div style={{background:"#f8faff",borderRadius:10,padding:"11px 14px",marginBottom:14,fontSize:13}}>
-          <div style={{fontWeight:700,color:"#1a2233",marginBottom:4}}>{selectedItem.label}</div>
+          <div style={{fontWeight:700,color:"#151c2e",marginBottom:4}}>{selectedItem.label}</div>
           카테고리 기본: <strong>{fmtD(selectedItem.catDueDays)}</strong> · 현재 기한: <strong>{fmtD(getEffDue(selectedItem.itemId,selectedItem.catDueDays,itemOverrides))}</strong>
         </div>
         <Field label="변경할 기한 (입사 후 일수)">
-          <div style={{display:"flex",alignItems:"center",gap:8}}><span style={{fontSize:14,color:"#8899bb",fontWeight:600}}>D+</span><FI type="number" value={itemDueVal} onChange={e=>setItemDueVal(e.target.value)}/></div>
+          <div style={{display:"flex",alignItems:"center",gap:8}}><span style={{fontSize:14,color:"#66718c",fontWeight:600}}>D+</span><FI type="number" value={itemDueVal} onChange={e=>setItemDueVal(e.target.value)}/></div>
         </Field>
         <div style={{display:"flex",gap:10,marginTop:4}}><PBtn onClick={applyItemDue} color="#9B59B6" style={{flex:1}}>적용</PBtn><OBtn onClick={()=>setItemDueModal(false)} style={{flex:1}}>취소</OBtn></div>
       </Modal>
@@ -1274,11 +1274,11 @@ const filteredExtReqs=extReqs.slice().reverse().filter(r=>{
     {mailModal&&(
       <Modal title={`📧 개별 메일 발송`} onClose={()=>setMailModal(null)} width={520}>
         <div style={{background:"#f8faff",borderRadius:10,padding:"11px 14px",marginBottom:14,fontSize:13}}>
-          <span style={{color:"#6b7a99"}}>수신: </span><span style={{fontWeight:700,color:"#1a2233"}}>{emp.name} {emp.email?`(${emp.email})`:""}</span>
+          <span style={{color:"#6b7a99"}}>수신: </span><span style={{fontWeight:700,color:"#151c2e"}}>{emp.name} {emp.email?`(${emp.email})`:""}</span>
         </div>
         <Field label="제목"><FI value={mailSubject} onChange={e=>setMailSubject(e.target.value)}/></Field>
-        <Field label="내용"><textarea value={mailBody} onChange={e=>setMailBody(e.target.value)} style={{width:"100%",height:150,padding:"10px 13px",borderRadius:9,border:"1.5px solid #e2e8f0",fontSize:13,outline:"none",boxSizing:"border-box",resize:"vertical",fontFamily:"inherit",lineHeight:1.6}}/></Field>
-        <div style={{display:"flex",gap:10,marginTop:4}}><PBtn onClick={sendItemMail} color="#E84545" style={{flex:1}}>📧 발송</PBtn><OBtn onClick={()=>setMailModal(null)} style={{flex:1}}>취소</OBtn></div>
+        <Field label="내용"><textarea value={mailBody} onChange={e=>setMailBody(e.target.value)} style={{width:"100%",height:150,padding:"10px 13px",borderRadius:9,border:"1.5px solid #e3e9f2",fontSize:13,outline:"none",boxSizing:"border-box",resize:"vertical",fontFamily:"inherit",lineHeight:1.6}}/></Field>
+        <div style={{display:"flex",gap:10,marginTop:4}}><PBtn onClick={sendItemMail} color="#e5484d" style={{flex:1}}>📧 발송</PBtn><OBtn onClick={()=>setMailModal(null)} style={{flex:1}}>취소</OBtn></div>
       </Modal>
     )}
 
@@ -1287,22 +1287,22 @@ const filteredExtReqs=extReqs.slice().reverse().filter(r=>{
         <div style={{background:"#fffbf0",border:"1px solid #F5A62330",borderRadius:8,padding:"8px 12px",fontSize:12,color:"#9a7020",marginBottom:12}}>
           ℹ️ 이 메모는 직원 체크리스트 화면에도 즉시 표시됩니다.
         </div>
-        <div style={{fontSize:13,fontWeight:600,color:"#1a2233",marginBottom:10}}>{noteModal.label}</div>
-        <Field label="메모 내용"><textarea value={noteText} onChange={e=>setNoteText(e.target.value)} placeholder="안내사항, 주의사항 등을 입력하세요." style={{width:"100%",height:120,padding:"10px 13px",borderRadius:9,border:"1.5px solid #e2e8f0",fontSize:13,outline:"none",boxSizing:"border-box",resize:"vertical",fontFamily:"inherit",lineHeight:1.6}}/></Field>
+        <div style={{fontSize:13,fontWeight:600,color:"#151c2e",marginBottom:10}}>{noteModal.label}</div>
+        <Field label="메모 내용"><textarea value={noteText} onChange={e=>setNoteText(e.target.value)} placeholder="안내사항, 주의사항 등을 입력하세요." style={{width:"100%",height:120,padding:"10px 13px",borderRadius:9,border:"1.5px solid #e3e9f2",fontSize:13,outline:"none",boxSizing:"border-box",resize:"vertical",fontFamily:"inherit",lineHeight:1.6}}/></Field>
         <div style={{display:"flex",gap:10,marginTop:4}}><PBtn onClick={saveNote} color="#F5A623" style={{flex:1}}>💬 저장</PBtn><OBtn onClick={()=>{setNoteModal(null);setNoteText("");}} style={{flex:1}}>취소</OBtn></div>
       </Modal>
     )}
     {rejectModal&&(
-  <Modal title="❌ 반려 사유 입력" onClose={()=>{setRejectModal(null);setRejectReason("");}} titleColor="#E84545">
-    <div style={{background:"#fff0f0",border:"1px solid #E8454530",borderRadius:8,padding:"9px 13px",fontSize:12,color:"#E84545",marginBottom:14}}>
+  <Modal title="❌ 반려 사유 입력" onClose={()=>{setRejectModal(null);setRejectReason("");}} titleColor="#e5484d">
+    <div style={{background:"#fff0f0",border:"1px solid #e5484d30",borderRadius:8,padding:"9px 13px",fontSize:12,color:"#e5484d",marginBottom:14}}>
       ⚠️ 반려 사유는 입사자 화면에 즉시 표시됩니다.
     </div>
     <Field label="반려 사유 (필수)">
       <textarea value={rejectReason} onChange={e=>setRejectReason(e.target.value)} placeholder="반려 사유를 상세히 입력해주세요." autoFocus
-        style={{width:"100%",height:110,padding:"10px 13px",borderRadius:9,border:"1.5px solid #e2e8f0",fontSize:13,outline:"none",boxSizing:"border-box",resize:"vertical",fontFamily:"inherit",lineHeight:1.6}}/>
+        style={{width:"100%",height:110,padding:"10px 13px",borderRadius:9,border:"1.5px solid #e3e9f2",fontSize:13,outline:"none",boxSizing:"border-box",resize:"vertical",fontFamily:"inherit",lineHeight:1.6}}/>
     </Field>
     <div style={{display:"flex",gap:10,marginTop:4}}>
-      <PBtn onClick={submitReject} color="#E84545" style={{flex:1}}>❌ 반려 확정</PBtn>
+      <PBtn onClick={submitReject} color="#e5484d" style={{flex:1}}>❌ 반려 확정</PBtn>
       <OBtn onClick={()=>{setRejectModal(null);setRejectReason("");}} style={{flex:1}}>취소</OBtn>
     </div>
   </Modal>
@@ -1427,13 +1427,13 @@ function OffboardingDetail({employee, checks:initChecks, tpl:initTpl, onBack, is
     {key:"all",    icon:"📬",label:"전체",  count:cntAll,      color:"#fff",activeBg:"rgba(255,255,255,.25)"},
     {key:"pending",icon:"⏳",label:"검토중", count:cntPending,  color:"#F5A623",activeBg:"rgba(245,166,35,.22)"},
     {key:"approved",icon:"✅",label:"승인됨",count:cntApproved, color:"#27AE60",activeBg:"rgba(39,174,96,.22)"},
-    {key:"rejected",icon:"❌",label:"반려됨",count:cntRejected, color:"#E84545",activeBg:"rgba(232,69,69,.22)"},
+    {key:"rejected",icon:"❌",label:"반려됨",count:cntRejected, color:"#e5484d",activeBg:"rgba(232,69,69,.22)"},
   ];
   const filteredReqs=extReqs.slice().reverse().filter(r=>extPanel==="all"||r.status===extPanel);
 
-  return(<div style={{minHeight:"100vh",background:"linear-gradient(135deg,#e8e4ff,#f5f3ff,#e4f0ff)",fontFamily:"'Pretendard',sans-serif"}}>
+  return(<div style={{minHeight:"100vh",background:"radial-gradient(1000px 480px at 85% -10%,#d5e8ff 0%,transparent 60%),radial-gradient(900px 420px at -10% 0%,#dbf1ff 0%,transparent 55%),#f2f5fb",fontFamily:"'Pretendard',sans-serif"}}>
     {/* HEADER */}
-    <div style={{background:"linear-gradient(135deg,#5B6EEA,#7c5ce8)",padding:"24px 28px",color:"#fff"}}>
+    <div style={{background:"linear-gradient(135deg,#2563eb,#38bdf8)",padding:"24px 28px",color:"#fff"}}>
       <div style={{maxWidth:780,margin:"0 auto"}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16,flexWrap:"wrap",gap:8}}>
           <button onClick={onBack}
@@ -1475,34 +1475,34 @@ function OffboardingDetail({employee, checks:initChecks, tpl:initTpl, onBack, is
 
     {/* EXTENSION PANEL */}
     {!isAdmin&&extPanel!==null&&cntAll>0&&(
-      <div style={{background:"rgba(255,255,255,.85)",backdropFilter:"blur(8px)",borderBottom:"1.5px solid rgba(91,110,234,.15)"}}>
+      <div style={{background:"rgba(255,255,255,.85)",backdropFilter:"blur(8px)",borderBottom:"1.5px solid rgba(37,99,235,.15)"}}>
         <div style={{maxWidth:780,margin:"0 auto",padding:"14px 22px"}}>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10,flexWrap:"wrap",gap:8}}>
             <div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap"}}>
               <span style={{fontWeight:700,fontSize:13,color:"#9a7020"}}>📬 기한 연장 요청</span>
               {EXT_TABS.map(tab=>(
                 <button key={tab.key} onClick={()=>setExtPanel(p=>p===tab.key?null:tab.key)}
-                  style={{background:extPanel===tab.key?tab.color+"22":"#f4f7fb",color:extPanel===tab.key?tab.color:"#8899bb",
-                    border:`1.5px solid ${extPanel===tab.key?tab.color+"60":"#e2e8f0"}`,borderRadius:99,
+                  style={{background:extPanel===tab.key?tab.color+"22":"#f4f7fb",color:extPanel===tab.key?tab.color:"#66718c",
+                    border:`1.5px solid ${extPanel===tab.key?tab.color+"60":"#e3e9f2"}`,borderRadius:99,
                     padding:"3px 10px",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"inherit",transition:"all .15s"}}>
                   {tab.icon} {tab.label} ({tab.count})
                 </button>
               ))}
             </div>
-            <button onClick={()=>setExtPanel(null)} style={{background:"transparent",border:"none",color:"#8899bb",fontSize:12,cursor:"pointer",fontFamily:"inherit",fontWeight:600}}>✕ 닫기</button>
+            <button onClick={()=>setExtPanel(null)} style={{background:"transparent",border:"none",color:"#66718c",fontSize:12,cursor:"pointer",fontFamily:"inherit",fontWeight:600}}>✕ 닫기</button>
           </div>
           {filteredReqs.length===0&&<div style={{fontSize:13,color:"#bbb",textAlign:"center",padding:"10px 0"}}>해당 항목이 없습니다.</div>}
           {filteredReqs.map(r=>{
-            const si={pending:["⏳ 검토중","#F5A623"],approved:["✅ 승인됨","#27AE60"],rejected:["❌ 반려됨","#E84545"]}[r.status];
+            const si={pending:["⏳ 검토중","#F5A623"],approved:["✅ 승인됨","#27AE60"],rejected:["❌ 반려됨","#e5484d"]}[r.status];
             return(<div key={r.id} style={{background:"#fff",borderRadius:10,padding:"11px 14px",marginBottom:7,boxShadow:"0 2px 8px rgba(0,0,0,.05)"}}>
               <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
                 <Badge text={si[0]} color={si[1]}/>
-                <span style={{fontWeight:700,fontSize:13,color:"#1a2233",flex:1}}>{r.itemLabel}</span>
+                <span style={{fontWeight:700,fontSize:13,color:"#151c2e",flex:1}}>{r.itemLabel}</span>
                 {r.status==="approved"&&<Badge text={`${fmtD(r.currentDue+r.requestDays)} (연장 확정)`} color="#27AE60"/>}
               </div>
-              <div style={{fontSize:12,color:"#8899bb",marginTop:5}}>{fmtD(r.currentDue)} → {fmtD(r.currentDue+r.requestDays)} ({r.requestDays}일 연장)</div>
+              <div style={{fontSize:12,color:"#66718c",marginTop:5}}>{fmtD(r.currentDue)} → {fmtD(r.currentDue+r.requestDays)} ({r.requestDays}일 연장)</div>
               <div style={{fontSize:12,color:"#6b7a99",marginTop:2,fontStyle:"italic"}}>사유: {r.reason}</div>
-              {r.status==="rejected"&&r.rejectReason&&<div style={{fontSize:12,color:"#E84545",marginTop:4,background:"#fff0f0",borderRadius:6,padding:"5px 9px"}}>💬 반려 사유: {r.rejectReason}</div>}
+              {r.status==="rejected"&&r.rejectReason&&<div style={{fontSize:12,color:"#e5484d",marginTop:4,background:"#fff0f0",borderRadius:6,padding:"5px 9px"}}>💬 반려 사유: {r.rejectReason}</div>}
               <div style={{fontSize:11,color:"#bbb",marginTop:3}}>{fmtDT(r.createdAt)}</div>
             </div>);
           })}
@@ -1512,7 +1512,7 @@ function OffboardingDetail({employee, checks:initChecks, tpl:initTpl, onBack, is
 
     {/* BODY */}
     <div style={{maxWidth:780,margin:"0 auto",padding:"24px 16px"}}>
-      <div style={{background:"#fff",borderRadius:16,overflow:"hidden",boxShadow:"0 4px 20px rgba(91,110,234,.1)"}}>
+      <div style={{background:"#fff",borderRadius:16,overflow:"hidden",boxShadow:"0 4px 20px rgba(37,99,235,.1)"}}>
         {allItems.length===0&&<div style={{padding:"28px",textAlign:"center",color:"#c0cce0",fontSize:14}}>항목이 없습니다.</div>}
         {allItems.map((item,idx)=>{
           const isDone=!!checks[item.id];
@@ -1528,12 +1528,12 @@ function OffboardingDetail({employee, checks:initChecks, tpl:initTpl, onBack, is
               onMouseLeave={e=>e.currentTarget.style.background=isDone?"#f6fff9":over?"#fff8f8":"#fff"}>
               <div onClick={()=>toggle(item.id)}
                 style={{width:22,height:22,borderRadius:6,flexShrink:0,cursor:"pointer",
-                  border:`2px solid ${isDone?"#27AE60":over?"#E84545":"#cdd8e8"}`,
+                  border:`2px solid ${isDone?"#27AE60":over?"#e5484d":"#cdd8e8"}`,
                   background:isDone?"#27AE60":"transparent",display:"flex",alignItems:"center",justifyContent:"center",transition:"all .2s"}}>
                 {isDone&&<span style={{color:"#fff",fontSize:13,fontWeight:700}}>✓</span>}
               </div>
-              <span onClick={()=>toggle(item.id)} style={{fontSize:14,color:isDone?"#6b8c7a":"#1a2233",textDecoration:isDone?"line-through":"none",flex:1,cursor:"pointer"}}>{item.label}</span>
-              {over&&!isDone&&<Badge text="기한초과" color="#E84545"/>}
+              <span onClick={()=>toggle(item.id)} style={{fontSize:14,color:isDone?"#6b8c7a":"#151c2e",textDecoration:isDone?"line-through":"none",flex:1,cursor:"pointer"}}>{item.label}</span>
+              {over&&!isDone&&<Badge text="기한초과" color="#e5484d"/>}
               {note&&<span title="메모 있음" style={{fontSize:13}}>💬</span>}
               {!isAdmin&&(()=>{
                 const pendingReq=extReqs.find(r=>r.itemId===item.id&&r.status==="pending");
@@ -1543,18 +1543,18 @@ function OffboardingDetail({employee, checks:initChecks, tpl:initTpl, onBack, is
                   {pendingReq&&<Badge text="연장요청중" color="#F5A623"/>}
                   {!isDone&&!pendingReq&&(
                     <SBtn onClick={e=>{e.stopPropagation();setExtModal({item,catDueDays:item.catDueDays});}}
-                      bg={over?"#FFF3CD":"#f0f4fa"} hoverBg={over?"#ffe8a0":"#e4eaf8"} color={over?"#9a7020":"#8899bb"} style={{fontSize:11}}>⏰ 기한연장요청</SBtn>
+                      bg={over?"#FFF3CD":"#f0f4fa"} hoverBg={over?"#ffe8a0":"#e4eaf8"} color={over?"#9a7020":"#66718c"} style={{fontSize:11}}>⏰ 기한연장요청</SBtn>
                   )}
                 </>);
               })()}
               {isAdmin&&(isEditing?(
                 <div style={{display:"flex",gap:5,alignItems:"center"}} onClick={e=>e.stopPropagation()}>
-                  <span style={{fontSize:11,color:"#8899bb"}}>D-</span>
+                  <span style={{fontSize:11,color:"#66718c"}}>D-</span>
                   <input type="number" min={0} value={editDueVal} autoFocus onChange={e=>setEditDueVal(e.target.value)}
                     onKeyDown={e=>e.key==="Enter"&&applyDue()}
-                    style={{width:56,padding:"3px 6px",borderRadius:6,border:"1.5px solid #5B6EEA",fontSize:12,outline:"none"}}/>
-                  <SBtn onClick={applyDue} bg="#5B6EEA" color="#fff" style={{fontSize:10}}>저장</SBtn>
-                  <SBtn onClick={()=>setEditDueId(null)} bg="#f0f4fa" color="#8899bb" style={{fontSize:10}}>취소</SBtn>
+                    style={{width:56,padding:"3px 6px",borderRadius:6,border:"1.5px solid #2563eb",fontSize:12,outline:"none"}}/>
+                  <SBtn onClick={applyDue} bg="#2563eb" color="#fff" style={{fontSize:10}}>저장</SBtn>
+                  <SBtn onClick={()=>setEditDueId(null)} bg="#f0f4fa" color="#66718c" style={{fontSize:10}}>취소</SBtn>
                 </div>
               ):(
                 <div onClick={e=>{e.stopPropagation();setEditDueId(item.id);setEditDueVal(String(Math.abs(effDue)));}}
@@ -1567,8 +1567,8 @@ function OffboardingDetail({employee, checks:initChecks, tpl:initTpl, onBack, is
               {isAdmin&&(
                 <div style={{display:"flex",gap:4,marginLeft:4}} onClick={e=>e.stopPropagation()}>
                   <SBtn onClick={()=>{setNoteModal(item);setNoteText(note?.text||"");}} bg="#fffbf0" color="#c07800" style={{fontSize:11,padding:"3px 7px"}}>💬</SBtn>
-                  <SBtn onClick={()=>openMail(item)} bg="#fff0f0" color="#E84545" style={{fontSize:11,padding:"3px 7px"}} disabled={isDone}>📧</SBtn>
-                  <SBtn onClick={()=>setDeleteConfirm({catId:item.catId,itemId:item.id,label:item.label})} bg="#fff0f0" color="#E84545" style={{fontSize:11,padding:"3px 7px"}}>🗑</SBtn>
+                  <SBtn onClick={()=>openMail(item)} bg="#fff0f0" color="#e5484d" style={{fontSize:11,padding:"3px 7px"}} disabled={isDone}>📧</SBtn>
+                  <SBtn onClick={()=>setDeleteConfirm({catId:item.catId,itemId:item.id,label:item.label})} bg="#fff0f0" color="#e5484d" style={{fontSize:11,padding:"3px 7px"}}>🗑</SBtn>
                 </div>
               )}
               <AttachBtn itemId={item.id} empId={employee.id} prefix="off"/>
@@ -1591,7 +1591,7 @@ function OffboardingDetail({employee, checks:initChecks, tpl:initTpl, onBack, is
           </div>);
         })}
       </div>
-      {pct===100&&(<div style={{background:"linear-gradient(135deg,#5B6EEA,#7c5ce8)",borderRadius:16,padding:"24px",marginTop:20,color:"#fff",textAlign:"center"}}>
+      {pct===100&&(<div style={{background:"linear-gradient(135deg,#2563eb,#38bdf8)",borderRadius:16,padding:"24px",marginTop:20,color:"#fff",textAlign:"center"}}>
         <div style={{fontSize:32,marginBottom:8}}>✅</div>
         <div style={{fontWeight:800,fontSize:18}}>모든 퇴사 처리 항목이 완료되었습니다!</div>
         {!isAdmin&&<div style={{marginTop:10}}>
@@ -1613,18 +1613,18 @@ function OffboardingDetail({employee, checks:initChecks, tpl:initTpl, onBack, is
     {extModal&&(
       <Modal title="⏰ 기한 연장 요청" onClose={()=>{setExtModal(null);setExtDays("");setExtReason("");}} width={460}>
         <div style={{background:"#f8faff",borderRadius:10,padding:"12px 15px",marginBottom:16}}>
-          <div style={{fontSize:12,color:"#8899bb",marginBottom:4}}>대상 항목</div>
-          <div style={{fontWeight:700,fontSize:14,color:"#1a2233"}}>{extModal.item.label}</div>
-          <div style={{fontSize:12,color:"#8899bb",marginTop:4}}>현재 기한: {fmtD(itemOverrides[extModal.item.id]??extModal.catDueDays)}</div>
+          <div style={{fontSize:12,color:"#66718c",marginBottom:4}}>대상 항목</div>
+          <div style={{fontWeight:700,fontSize:14,color:"#151c2e"}}>{extModal.item.label}</div>
+          <div style={{fontSize:12,color:"#66718c",marginTop:4}}>현재 기한: {fmtD(itemOverrides[extModal.item.id]??extModal.catDueDays)}</div>
         </div>
         <Field label="연장 요청 일수">
           <div style={{display:"flex",alignItems:"center",gap:8}}>
             <FI type="number" value={extDays} onChange={e=>setExtDays(e.target.value)} placeholder="예: 3" style={{flex:1}}/>
-            <span style={{fontSize:13,color:"#8899bb",whiteSpace:"nowrap"}}>일 연장</span>
+            <span style={{fontSize:13,color:"#66718c",whiteSpace:"nowrap"}}>일 연장</span>
           </div>
         </Field>
         <Field label="연장 사유"><textarea value={extReason} onChange={e=>setExtReason(e.target.value)} placeholder="연장이 필요한 사유를 입력해주세요." rows={3}
-          style={{width:"100%",padding:"10px 13px",borderRadius:9,border:"1.5px solid #e2e8f0",fontSize:13,outline:"none",resize:"none",fontFamily:"inherit",boxSizing:"border-box"}}/></Field>
+          style={{width:"100%",padding:"10px 13px",borderRadius:9,border:"1.5px solid #e3e9f2",fontSize:13,outline:"none",resize:"none",fontFamily:"inherit",boxSizing:"border-box"}}/></Field>
         <div style={{display:"flex",gap:10,marginTop:8}}>
           <PBtn onClick={submitExt} style={{flex:1}}>요청 제출</PBtn>
           <OBtn onClick={()=>{setExtModal(null);setExtDays("");setExtReason("");}} style={{flex:1}}>취소</OBtn>
@@ -1645,19 +1645,19 @@ function OffboardingDetail({employee, checks:initChecks, tpl:initTpl, onBack, is
         <div style={{background:"#fffbf0",border:"1px solid #F5A62330",borderRadius:8,padding:"8px 12px",fontSize:12,color:"#9a7020",marginBottom:12}}>
           ℹ️ 이 메모는 직원 체크리스트 화면에도 즉시 표시됩니다.
         </div>
-        <Field label="대상 항목"><div style={{fontSize:13,fontWeight:700,color:"#1a2233",padding:"4px 0"}}>{noteModal.label}</div></Field>
+        <Field label="대상 항목"><div style={{fontSize:13,fontWeight:700,color:"#151c2e",padding:"4px 0"}}>{noteModal.label}</div></Field>
         <Field label="메모 내용"><textarea value={noteText} onChange={e=>setNoteText(e.target.value)} rows={4}
-          style={{width:"100%",padding:"10px 13px",borderRadius:9,border:"1.5px solid #e2e8f0",fontSize:13,outline:"none",resize:"vertical",fontFamily:"inherit",boxSizing:"border-box"}}/></Field>
+          style={{width:"100%",padding:"10px 13px",borderRadius:9,border:"1.5px solid #e3e9f2",fontSize:13,outline:"none",resize:"vertical",fontFamily:"inherit",boxSizing:"border-box"}}/></Field>
         <div style={{display:"flex",gap:10,marginTop:8}}><PBtn onClick={saveNote} style={{flex:1}}>저장</PBtn><OBtn onClick={()=>{setNoteModal(null);setNoteText("");}} style={{flex:1}}>취소</OBtn></div>
       </Modal>
     )}
 
     {mailModal&&(
       <Modal title="📧 알림 메일 발송" onClose={()=>setMailModal(null)} width={500}>
-        <Field label="수신자"><div style={{fontSize:13,color:"#1a2233",padding:"4px 0"}}>{employee.email||"(이메일 미등록)"}</div></Field>
+        <Field label="수신자"><div style={{fontSize:13,color:"#151c2e",padding:"4px 0"}}>{employee.email||"(이메일 미등록)"}</div></Field>
         <Field label="제목"><FI value={mailSubject} onChange={e=>setMailSubject(e.target.value)}/></Field>
         <Field label="내용"><textarea value={mailBody} onChange={e=>setMailBody(e.target.value)} rows={6}
-          style={{width:"100%",padding:"10px 13px",borderRadius:9,border:"1.5px solid #e2e8f0",fontSize:13,outline:"none",resize:"vertical",fontFamily:"inherit",boxSizing:"border-box"}}/></Field>
+          style={{width:"100%",padding:"10px 13px",borderRadius:9,border:"1.5px solid #e3e9f2",fontSize:13,outline:"none",resize:"vertical",fontFamily:"inherit",boxSizing:"border-box"}}/></Field>
         <div style={{display:"flex",gap:10,marginTop:8}}><PBtn onClick={sendMail} style={{flex:1}}>메일 앱으로 열기</PBtn><OBtn onClick={()=>setMailModal(null)} style={{flex:1}}>취소</OBtn></div>
       </Modal>
     )}
@@ -1870,7 +1870,7 @@ function AdminDashboard({onBack}){
       onClick={c.k?()=>setSort(s=>s.key===c.k?{key:c.k,dir:-s.dir}:{key:c.k,dir:1}):undefined}
       title={c.k?"클릭할 때마다 오름차순 ↔ 내림차순":undefined}
       style={{padding:"10px 13px",textAlign:"center",fontSize:11,fontWeight:700,
-        color:sort.key===c.k?"#5B6EEA":"#8899bb",letterSpacing:".4px",whiteSpace:"nowrap",
+        color:sort.key===c.k?"#2563eb":"#66718c",letterSpacing:".4px",whiteSpace:"nowrap",
         cursor:c.k?"pointer":"default",userSelect:"none"}}>
       {c.h}{sort.key===c.k?(sort.dir===1?" ▲":" ▼"):""}
     </th>
@@ -1902,13 +1902,13 @@ const filteredExt=allExtReqs.filter(r=>{
   const extGroups=Object.values(extByEmp);
 
   const DASH_EXT_TABS=[
-    {key:"all",    icon:"📬", label:"전체",  count:extAll,     color:"#5B6EEA"},
+    {key:"all",    icon:"📬", label:"전체",  count:extAll,     color:"#2563eb"},
     {key:"pending",icon:"⏳", label:"검토중", count:extPending, color:"#F5A623"},
     {key:"approved",icon:"✅",label:"승인됨", count:extApproved,color:"#27AE60"},
   ];
 
-  return(<div style={{minHeight:"100vh",background:"linear-gradient(135deg,#e8e4ff 0%,#f5f3ff 50%,#e4f0ff 100%)",fontFamily:"'Pretendard',sans-serif"}}>
-    <div style={{background:"linear-gradient(135deg,#5B6EEA,#7c5ce8)",padding:"20px 24px",color:"#fff",boxShadow:"0 4px 24px rgba(100,80,200,.2)"}}>
+  return(<div style={{minHeight:"100vh",background:"radial-gradient(1000px 480px at 85% -10%,#d5e8ff 0%,transparent 60%),radial-gradient(900px 420px at -10% 0%,#dbf1ff 0%,transparent 55%),#f2f5fb",fontFamily:"'Pretendard',sans-serif"}}>
+    <div style={{background:"linear-gradient(135deg,#2563eb,#38bdf8)",padding:"20px 24px",color:"#fff",boxShadow:"0 4px 24px rgba(37,99,235,.2)"}}>
       <div style={{maxWidth:1100,margin:"0 auto"}}>
         {onBack&&<button onClick={onBack} style={{background:"rgba(255,255,255,.15)",border:"none",color:"#fff",padding:"5px 12px",borderRadius:7,fontSize:12,cursor:"pointer",marginBottom:12,fontFamily:"inherit"}}>← 로그아웃</button>}
         <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",flexWrap:"wrap",gap:12}}>
@@ -1960,7 +1960,7 @@ const filteredExt=allExtReqs.filter(r=>{
             )}
             {activeTab==="onboarding"&&<>
               <SBtn onClick={()=>employees.forEach(sendReminder)} bg="rgba(255,255,255,.18)" color="#fff" style={{padding:"7px 12px",fontSize:12,borderRadius:9,border:"1px solid rgba(255,255,255,.3)"}}>📧 전체 알림</SBtn>
-              <SBtn onClick={()=>setShowAdd(true)} bg="#fff" color="#5B6EEA" style={{padding:"7px 12px",fontSize:12,borderRadius:9,fontWeight:700}}>＋ 입사자</SBtn>
+              <SBtn onClick={()=>setShowAdd(true)} bg="#fff" color="#2563eb" style={{padding:"7px 12px",fontSize:12,borderRadius:9,fontWeight:700}}>＋ 입사자</SBtn>
             </>}
             {activeTab==="offboarding"&&(
               <SBtn onClick={()=>setShowAddOff(true)} bg="#fff" color="#e84c8b" style={{padding:"7px 12px",fontSize:12,borderRadius:9,fontWeight:700}}>＋ 퇴사자 등록</SBtn>
@@ -1979,32 +1979,32 @@ const filteredExt=allExtReqs.filter(r=>{
               <span style={{fontWeight:700,fontSize:13,color:"#9a7020"}}>📬 기한 연장 요청 현황 — 전체 대상자</span>
               {DASH_EXT_TABS.map(tab=>(
                 <button key={tab.key} onClick={()=>handleExtTabClick(tab.key)}
-                  style={{background:extPanel===tab.key?tab.color+"22":"#f4f7fb",color:extPanel===tab.key?tab.color:"#8899bb",
-                    border:`1.5px solid ${extPanel===tab.key?tab.color+"60":"#e2e8f0"}`,borderRadius:99,
+                  style={{background:extPanel===tab.key?tab.color+"22":"#f4f7fb",color:extPanel===tab.key?tab.color:"#66718c",
+                    border:`1.5px solid ${extPanel===tab.key?tab.color+"60":"#e3e9f2"}`,borderRadius:99,
                     padding:"3px 10px",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>
                   {tab.icon} {tab.label} ({tab.count})
                 </button>
               ))}
             </div>
-            <button onClick={()=>setExtPanel(null)} style={{background:"transparent",border:"none",color:"#8899bb",fontSize:12,cursor:"pointer",fontFamily:"inherit",fontWeight:600}}>✕ 닫기</button>
+            <button onClick={()=>setExtPanel(null)} style={{background:"transparent",border:"none",color:"#66718c",fontSize:12,cursor:"pointer",fontFamily:"inherit",fontWeight:600}}>✕ 닫기</button>
           </div>
           {extGroups.length===0&&<div style={{fontSize:13,color:"#bbb",textAlign:"center",padding:"12px 0"}}>해당 항목이 없습니다.</div>}
           {extGroups.map(g=>(
             <div key={g.empName+g.department} style={{background:"#fff",borderRadius:14,marginBottom:12,overflow:"hidden",boxShadow:"0 2px 10px rgba(30,50,120,.06)"}}>
               <div style={{padding:"10px 16px",background:"#f8faff",borderBottom:"1px solid #f0f4fa",display:"flex",alignItems:"center",gap:10}}>
                 <span style={{fontSize:16}}>👤</span>
-                <span style={{fontWeight:700,fontSize:14,color:"#1a2233"}}>{g.empName}</span>
+                <span style={{fontWeight:700,fontSize:14,color:"#151c2e"}}>{g.empName}</span>
                 <span style={{fontSize:12,color:"#6b7a99"}}>{g.department}</span>
-                <Badge text={`${g.reqs.length}건`} color="#5B6EEA"/>
+                <Badge text={`${g.reqs.length}건`} color="#2563eb"/>
               </div>
               {g.reqs.map(r=>{
-                const si={pending:["⏳ 검토중","#F5A623"],approved:["✅ 승인됨","#27AE60"],rejected:["❌ 반려됨","#E84545"]}[r.status];
+                const si={pending:["⏳ 검토중","#F5A623"],approved:["✅ 승인됨","#27AE60"],rejected:["❌ 반려됨","#e5484d"]}[r.status];
                 return(<div key={r.id} style={{display:"flex",alignItems:"flex-start",gap:12,padding:"10px 16px",borderBottom:"1px solid #f4f7fa",flexWrap:"wrap"}}>
                   <Badge text={si[0]} color={si[1]}/>
                   <div style={{flex:1,minWidth:160}}>
-                    <div style={{fontWeight:600,fontSize:13,color:"#1a2233",marginBottom:2}}>{r.itemLabel}</div>
+                    <div style={{fontWeight:600,fontSize:13,color:"#151c2e",marginBottom:2}}>{r.itemLabel}</div>
                     <div style={{fontSize:12,color:"#6b7a99"}}>{fmtD(r.currentDue)} → {fmtD(r.currentDue+r.requestDays)} ({r.requestDays}일 연장)</div>
-                    <div style={{fontSize:12,color:"#8899bb",fontStyle:"italic",marginTop:2}}>사유: {r.reason}</div>
+                    <div style={{fontSize:12,color:"#66718c",fontStyle:"italic",marginTop:2}}>사유: {r.reason}</div>
                     <div style={{fontSize:11,color:"#bbb",marginTop:1}}>{fmtDT(r.createdAt)}</div>
                   </div>
                 </div>);
@@ -2017,28 +2017,28 @@ const filteredExt=allExtReqs.filter(r=>{
 
     {/* ── Relogin requests panel ── */}
     {reloginPanel&&(
-      <div style={{background:"#f0f4ff",borderBottom:"2px solid #5B6EEA30"}}>
+      <div style={{background:"#f0f4ff",borderBottom:"2px solid #2563eb30"}}>
         <div style={{maxWidth:1100,margin:"0 auto",padding:"14px 22px"}}>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
-            <span style={{fontWeight:700,fontSize:13,color:"#5B6EEA"}}>🔓 재로그인 승인 요청</span>
-            <button onClick={()=>setReloginPanel(false)} style={{background:"transparent",border:"none",color:"#8899bb",fontSize:12,cursor:"pointer",fontFamily:"inherit",fontWeight:600}}>✕ 닫기</button>
+            <span style={{fontWeight:700,fontSize:13,color:"#2563eb"}}>🔓 재로그인 승인 요청</span>
+            <button onClick={()=>setReloginPanel(false)} style={{background:"transparent",border:"none",color:"#66718c",fontSize:12,cursor:"pointer",fontFamily:"inherit",fontWeight:600}}>✕ 닫기</button>
           </div>
           {reloginReqs.length===0&&<div style={{fontSize:13,color:"#bbb",textAlign:"center",padding:"12px 0"}}>요청이 없습니다.</div>}
           {reloginReqs.map(r=>{
-            const si={pending:["⏳ 검토중","#F5A623"],approved:["✅ 승인됨","#27AE60"],rejected:["❌ 반려됨","#E84545"]}[r.status];
+            const si={pending:["⏳ 검토중","#F5A623"],approved:["✅ 승인됨","#27AE60"],rejected:["❌ 반려됨","#e5484d"]}[r.status];
             return(
               <div key={r.id} style={{background:"#fff",borderRadius:12,marginBottom:10,padding:"12px 16px",boxShadow:"0 2px 8px rgba(30,50,120,.06)",display:"flex",alignItems:"flex-start",gap:12,flexWrap:"wrap"}}>
                 <Badge text={si[0]} color={si[1]}/>
                 <div style={{flex:1,minWidth:160}}>
-                  <div style={{fontWeight:700,fontSize:14,color:"#1a2233"}}>{r.empName} <span style={{fontWeight:400,fontSize:12,color:"#8899bb"}}>{r.department} · {r.position}</span></div>
-                  <div style={{fontSize:12,color:"#5B6EEA",marginTop:2}}>{r.type==="on"?"입사자 온보딩":"퇴사자 오프보딩"}</div>
+                  <div style={{fontWeight:700,fontSize:14,color:"#151c2e"}}>{r.empName} <span style={{fontWeight:400,fontSize:12,color:"#66718c"}}>{r.department} · {r.position}</span></div>
+                  <div style={{fontSize:12,color:"#2563eb",marginTop:2}}>{r.type==="on"?"입사자 온보딩":"퇴사자 오프보딩"}</div>
                   <div style={{fontSize:13,color:"#4a5568",marginTop:4,fontStyle:"italic"}}>"{r.reason}"</div>
                   <div style={{fontSize:11,color:"#bbb",marginTop:3}}>{fmtDT(r.createdAt)}</div>
                 </div>
                 {r.status==="pending"&&(
                   <div style={{display:"flex",gap:6,alignSelf:"center"}}>
                     <SBtn onClick={()=>approveRelogin(r)} bg="#27AE60" color="#fff" hoverBg="#1e9655" style={{fontSize:12,padding:"5px 12px"}}>승인</SBtn>
-                    <SBtn onClick={()=>rejectRelogin(r)} bg="#f4f7fb" color="#E84545" hoverBg="#fff0f0" style={{fontSize:12,padding:"5px 12px"}}>반려</SBtn>
+                    <SBtn onClick={()=>rejectRelogin(r)} bg="#f4f7fb" color="#e5484d" hoverBg="#fff0f0" style={{fontSize:12,padding:"5px 12px"}}>반려</SBtn>
                   </div>
                 )}
               </div>
@@ -2060,7 +2060,7 @@ const filteredExt=allExtReqs.filter(r=>{
               style={{background:"#fff",borderRadius:14,padding:"18px 20px",boxShadow:"0 2px 12px rgba(30,50,120,.07)",
                 cursor:c.st?"pointer":"default",userSelect:c.st?"none":"auto"}}>
               <div style={{fontSize:20,marginBottom:6}}>{c.icon}</div>
-              <div style={{fontSize:26,fontWeight:800,color:c.red?"#E84545":"#3a3a4a"}}>{c.value}</div>
+              <div style={{fontSize:26,fontWeight:800,color:c.red?"#e5484d":"#3a3a4a"}}>{c.value}</div>
               <div style={{fontSize:13,color:"#b0b8c8",fontWeight:500,marginTop:2}}>{c.label}</div>
               {c.st&&<div style={{fontSize:10,color:"#c5cbe0",marginTop:4,fontWeight:600}}>더블클릭 상세보기</div>}
             </div>
@@ -2078,7 +2078,7 @@ const filteredExt=allExtReqs.filter(r=>{
               style={{background:"#fff",borderRadius:14,padding:"18px 20px",boxShadow:"0 2px 12px rgba(30,50,120,.07)",
                 cursor:c.st?"pointer":"default",userSelect:c.st?"none":"auto"}}>
               <div style={{fontSize:20,marginBottom:6}}>{c.icon}</div>
-              <div style={{fontSize:26,fontWeight:800,color:c.red?"#E84545":"#3a3a4a"}}>{c.value}</div>
+              <div style={{fontSize:26,fontWeight:800,color:c.red?"#e5484d":"#3a3a4a"}}>{c.value}</div>
               <div style={{fontSize:13,color:"#b0b8c8",fontWeight:500,marginTop:2}}>{c.label}</div>
               {c.st&&<div style={{fontSize:10,color:"#c5cbe0",marginTop:4,fontWeight:600}}>더블클릭 상세보기</div>}
             </div>
@@ -2101,28 +2101,28 @@ const filteredExt=allExtReqs.filter(r=>{
         const card={background:"#fff",borderRadius:16,boxShadow:"0 2px 14px rgba(30,50,120,.07)",padding:"18px 22px",marginBottom:16};
         return(<div>
           <div style={{...card,display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
-            <span style={{fontWeight:700,fontSize:14,color:"#1a2233"}}>입·퇴사율 기준 인원(현재 재직 인원)</span>
+            <span style={{fontWeight:700,fontSize:14,color:"#151c2e"}}>입·퇴사율 기준 인원(현재 재직 인원)</span>
             <input type="number" value={headcount} onChange={e=>setHeadcount(e.target.value)} placeholder="예: 233"
-              style={{width:90,padding:"6px 10px",borderRadius:8,border:"1.5px solid #e2e8f0",fontSize:13,fontFamily:"inherit",outline:"none"}}/>
-            <span style={{fontSize:13,color:"#8899bb"}}>명</span>
-            <SBtn onClick={async()=>{await save("stats_headcount",parseInt(headcount,10)||0,true);toast("기준 인원을 저장했습니다.","success");}} bg="#5B6EEA" color="#fff" style={{padding:"6px 14px"}}>저장</SBtn>
+              style={{width:90,padding:"6px 10px",borderRadius:8,border:"1.5px solid #e3e9f2",fontSize:13,fontFamily:"inherit",outline:"none"}}/>
+            <span style={{fontSize:13,color:"#66718c"}}>명</span>
+            <SBtn onClick={async()=>{await save("stats_headcount",parseInt(headcount,10)||0,true);toast("기준 인원을 저장했습니다.","success");}} bg="#2563eb" color="#fff" style={{padding:"6px 14px"}}>저장</SBtn>
             <span style={{fontSize:11,color:"#b0b8c8"}}>※ 통계는 이 사이트에 등록된 입·퇴사자 기준이며, 비율 = 인원수 ÷ 기준 인원</span>
           </div>
           <div style={card}>
-            <div style={{fontWeight:700,fontSize:15,color:"#1a2233",marginBottom:14}}>월간 입·퇴사 (최근 12개월) <span style={{fontSize:11,fontWeight:500,color:"#b0b8c8"}}>— 인원수 · 월간 입/퇴사율</span></div>
-            <div style={{display:"flex",gap:14,marginBottom:10,fontSize:12,color:"#8899bb"}}>
-              <span><span style={{display:"inline-block",width:10,height:10,background:"#5B6EEA",borderRadius:3,marginRight:5}}/>입사</span>
+            <div style={{fontWeight:700,fontSize:15,color:"#151c2e",marginBottom:14}}>월간 입·퇴사 (최근 12개월) <span style={{fontSize:11,fontWeight:500,color:"#b0b8c8"}}>— 인원수 · 월간 입/퇴사율</span></div>
+            <div style={{display:"flex",gap:14,marginBottom:10,fontSize:12,color:"#66718c"}}>
+              <span><span style={{display:"inline-block",width:10,height:10,background:"#2563eb",borderRadius:3,marginRight:5}}/>입사</span>
               <span><span style={{display:"inline-block",width:10,height:10,background:"#e84c8b",borderRadius:3,marginRight:5}}/>퇴사</span>
             </div>
             {months.map((m,i)=>(
               <div key={m} style={{display:"flex",alignItems:"center",gap:10,marginBottom:7}}>
-                <span style={{fontSize:12,color:"#8899bb",minWidth:58,fontVariantNumeric:"tabular-nums"}}>{m}</span>
+                <span style={{fontSize:12,color:"#66718c",minWidth:58,fontVariantNumeric:"tabular-nums"}}>{m}</span>
                 <div style={{flex:1}}>
                   <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:2}}>
                     <div style={{flex:1,height:9,background:"#eef1f8",borderRadius:5,overflow:"hidden"}}>
-                      <div style={{height:"100%",width:`${(joinM[i]/maxM)*100}%`,background:"#5B6EEA",borderRadius:5,transition:"width .4s"}}/>
+                      <div style={{height:"100%",width:`${(joinM[i]/maxM)*100}%`,background:"#2563eb",borderRadius:5,transition:"width .4s"}}/>
                     </div>
-                    <span style={{fontSize:11,fontWeight:700,color:"#5B6EEA",minWidth:64,textAlign:"right"}}>{joinM[i]?`${joinM[i]}명${base>0?` · ${rate(joinM[i])}`:""}`:""}</span>
+                    <span style={{fontSize:11,fontWeight:700,color:"#2563eb",minWidth:64,textAlign:"right"}}>{joinM[i]?`${joinM[i]}명${base>0?` · ${rate(joinM[i])}`:""}`:""}</span>
                   </div>
                   <div style={{display:"flex",alignItems:"center",gap:6}}>
                     <div style={{flex:1,height:9,background:"#eef1f8",borderRadius:5,overflow:"hidden"}}>
@@ -2135,26 +2135,26 @@ const filteredExt=allExtReqs.filter(r=>{
             ))}
           </div>
           <div style={{...card,padding:0,overflow:"hidden"}}>
-            <div style={{fontWeight:700,fontSize:15,color:"#1a2233",padding:"15px 22px",borderBottom:"1px solid #f0f4fa"}}>연간 입·퇴사율</div>
+            <div style={{fontWeight:700,fontSize:15,color:"#151c2e",padding:"15px 22px",borderBottom:"1px solid #f0f4fa"}}>연간 입·퇴사율</div>
             <table style={{width:"100%",borderCollapse:"collapse",fontSize:14}}>
               <thead><tr style={{background:"#f8faff"}}>
                 {["연도","입사","입사율","퇴사","퇴사율","순증감"].map(h=>
-                  <th key={h} style={{padding:"10px 13px",textAlign:"center",fontSize:11,fontWeight:700,color:"#8899bb"}}>{h}</th>)}
+                  <th key={h} style={{padding:"10px 13px",textAlign:"center",fontSize:11,fontWeight:700,color:"#66718c"}}>{h}</th>)}
               </tr></thead>
               <tbody>
                 {years.map(y=>{
                   const j=employees.filter(e=>yy(e.joinDate)===y).length;
                   const l=offEmps.filter(e=>yy(e.leaveDate)===y).length;
                   return(<tr key={y} style={{borderBottom:"1px solid #f0f4fa"}}>
-                    <td style={{padding:"11px",textAlign:"center",fontWeight:700,color:"#1a2233"}}>{y}년</td>
-                    <td style={{padding:"11px",textAlign:"center",color:"#5B6EEA",fontWeight:700}}>{j}명</td>
-                    <td style={{padding:"11px",textAlign:"center",color:"#5B6EEA"}}>{rate(j)}</td>
+                    <td style={{padding:"11px",textAlign:"center",fontWeight:700,color:"#151c2e"}}>{y}년</td>
+                    <td style={{padding:"11px",textAlign:"center",color:"#2563eb",fontWeight:700}}>{j}명</td>
+                    <td style={{padding:"11px",textAlign:"center",color:"#2563eb"}}>{rate(j)}</td>
                     <td style={{padding:"11px",textAlign:"center",color:"#e84c8b",fontWeight:700}}>{l}명</td>
                     <td style={{padding:"11px",textAlign:"center",color:"#e84c8b"}}>{rate(l)}</td>
-                    <td style={{padding:"11px",textAlign:"center",fontWeight:700,color:j-l>=0?"#27AE60":"#E84545"}}>{j-l>=0?"+":""}{j-l}명</td>
+                    <td style={{padding:"11px",textAlign:"center",fontWeight:700,color:j-l>=0?"#27AE60":"#e5484d"}}>{j-l>=0?"+":""}{j-l}명</td>
                   </tr>);
                 })}
-                {years.length===0&&<tr><td colSpan={6} style={{padding:26,textAlign:"center",color:"#8899bb",fontSize:13}}>데이터가 없습니다.</td></tr>}
+                {years.length===0&&<tr><td colSpan={6} style={{padding:26,textAlign:"center",color:"#66718c",fontSize:13}}>데이터가 없습니다.</td></tr>}
               </tbody>
             </table>
           </div>
@@ -2163,21 +2163,21 @@ const filteredExt=allExtReqs.filter(r=>{
 
       {activeTab==="onboarding"&&<div style={{background:"#fff",borderRadius:16,boxShadow:"0 2px 14px rgba(30,50,120,.07)",overflow:"hidden"}}>
         <div style={{padding:"13px 18px",borderBottom:"1px solid #f0f4fa",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:10}}>
-          <span style={{fontWeight:700,fontSize:15,color:"#1a2233"}}>입사자 현황</span>
+          <span style={{fontWeight:700,fontSize:15,color:"#151c2e"}}>입사자 현황</span>
           <div style={{display:"flex",gap:9,alignItems:"center",flexWrap:"wrap"}}>
-            <span style={{fontSize:11,color:"#8899bb"}}>행 더블클릭 → 상세보기</span>
-            <select value={filterDept} onChange={e=>setFilterDept(e.target.value)} style={{padding:"5px 10px",borderRadius:8,border:"1.5px solid #e2e8f0",fontSize:13,color:"#1a2233",outline:"none"}}>
+            <span style={{fontSize:11,color:"#66718c"}}>행 더블클릭 → 상세보기</span>
+            <select value={filterDept} onChange={e=>setFilterDept(e.target.value)} style={{padding:"5px 10px",borderRadius:8,border:"1.5px solid #e3e9f2",fontSize:13,color:"#151c2e",outline:"none"}}>
               {depts.map(d=><option key={d}>{d}</option>)}
             </select>
-            <select value={filterStatus} onChange={e=>setFilterStatus(e.target.value)} style={{padding:"5px 10px",borderRadius:8,border:"1.5px solid #e2e8f0",fontSize:13,color:"#1a2233",outline:"none"}}>
+            <select value={filterStatus} onChange={e=>setFilterStatus(e.target.value)} style={{padding:"5px 10px",borderRadius:8,border:"1.5px solid #e3e9f2",fontSize:13,color:"#151c2e",outline:"none"}}>
               {["전체","완료","진행중","미시작"].map(s=><option key={s}>{s}</option>)}
             </select>
           </div>
         </div>
         {loading?(
-          <div style={{padding:44,textAlign:"center",color:"#8899bb"}}>불러오는 중...</div>
+          <div style={{padding:44,textAlign:"center",color:"#66718c"}}>불러오는 중...</div>
         ):employees.length===0?(
-          <div style={{padding:60,textAlign:"center",color:"#8899bb"}}>
+          <div style={{padding:60,textAlign:"center",color:"#66718c"}}>
             <div style={{fontSize:38,marginBottom:10}}>📭</div>
             <div style={{fontWeight:700,fontSize:15,marginBottom:5}}>등록된 입사자가 없습니다</div>
             <div style={{fontSize:13}}>상단 [＋ 입사자] 버튼을 눌러 추가하세요</div>
@@ -2195,15 +2195,15 @@ const filteredExt=allExtReqs.filter(r=>{
                 {filtered.map(emp=>{
                   const {pct}=calcProgress(checksMap[emp.id]||{},tplOf(emp));
                   const elapsed=daysBetween(emp.joinDate);
-                  const sc=pct===100?"#27AE60":pct===0?"#E84545":"#F5A623";
+                  const sc=pct===100?"#27AE60":pct===0?"#e5484d":"#F5A623";
                   const st=pct===100?"완료":pct===0?"미시작":"진행중";
                   const empExtPending=allExtReqs.filter(r=>r.empId===emp.id&&r.status==="pending").length;
                   return(<tr key={emp.id} onClick={()=>handleRowClick(emp)}
                     style={{borderBottom:"1px solid #f0f4fa",cursor:"pointer",transition:"background .15s"}}
                     onMouseEnter={e=>e.currentTarget.style.background="#f8faff"}
                     onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
-                    <td style={{padding:"12px 13px",color:"#8899bb",textAlign:"center",fontSize:12}}>{emp.empId||"-"}</td>
-                    <td style={{padding:"12px 13px",fontWeight:700,color:"#1a2233",textAlign:"center"}}>
+                    <td style={{padding:"12px 13px",color:"#66718c",textAlign:"center",fontSize:12}}>{emp.empId||"-"}</td>
+                    <td style={{padding:"12px 13px",fontWeight:700,color:"#151c2e",textAlign:"center"}}>
                       <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
                         {emp.name}
                         {empExtPending>0&&<Badge text={`연장요청 ${empExtPending}`} color="#F5A623"/>}
@@ -2224,14 +2224,14 @@ const filteredExt=allExtReqs.filter(r=>{
                     <td style={{padding:"12px 13px",textAlign:"center"}}><Badge text={st} color={sc}/></td>
                     <td style={{padding:"12px 13px",textAlign:"center"}}>
                       <div style={{display:"flex",justifyContent:"center",gap:5}}>
-                        <SBtn onClick={e=>{e.stopPropagation();selectEditTarget(emp);setJoinModal(true);}} bg="#f0f4ff" color="#5B6EEA" style={{border:"1px solid #d5defc"}}>✏️ 정보변경</SBtn>
-                        <SBtn onClick={e=>{e.stopPropagation();sendReminder(emp);}} bg="#fff4f4" color="#E84545" style={{border:"1px solid #ffcccc"}}>📧 알림</SBtn>
-                        <SBtn onClick={e=>{e.stopPropagation();deleteEmployee(emp.id);}} bg="#f4f7fb" color="#8899bb" style={{border:"1px solid #e2e8f0"}}>삭제</SBtn>
+                        <SBtn onClick={e=>{e.stopPropagation();selectEditTarget(emp);setJoinModal(true);}} bg="#f0f4ff" color="#2563eb" style={{border:"1px solid #d5defc"}}>✏️ 정보변경</SBtn>
+                        <SBtn onClick={e=>{e.stopPropagation();sendReminder(emp);}} bg="#fff4f4" color="#e5484d" style={{border:"1px solid #ffcccc"}}>📧 알림</SBtn>
+                        <SBtn onClick={e=>{e.stopPropagation();deleteEmployee(emp.id);}} bg="#f4f7fb" color="#66718c" style={{border:"1px solid #e3e9f2"}}>삭제</SBtn>
                       </div>
                     </td>
                   </tr>);
                 })}
-                {filtered.length===0&&<tr><td colSpan={9} style={{padding:28,textAlign:"center",color:"#8899bb",fontSize:13}}>필터 조건에 맞는 사원이 없습니다.</td></tr>}
+                {filtered.length===0&&<tr><td colSpan={9} style={{padding:28,textAlign:"center",color:"#66718c",fontSize:13}}>필터 조건에 맞는 사원이 없습니다.</td></tr>}
               </tbody>
             </table>
           </div>
@@ -2248,21 +2248,21 @@ const filteredExt=allExtReqs.filter(r=>{
         }).sort((a,b)=>cmpEmp(a,b,sortOff,true));
         return(<div style={{background:"#fff",borderRadius:16,boxShadow:"0 2px 14px rgba(30,50,120,.07)",overflow:"hidden"}}>
           <div style={{padding:"13px 18px",borderBottom:"1px solid #f0f4fa",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:10}}>
-            <span style={{fontWeight:700,fontSize:15,color:"#1a2233"}}>퇴사자 현황</span>
+            <span style={{fontWeight:700,fontSize:15,color:"#151c2e"}}>퇴사자 현황</span>
             <div style={{display:"flex",gap:9,alignItems:"center",flexWrap:"wrap"}}>
-              <span style={{fontSize:11,color:"#8899bb"}}>행 더블클릭 → 상세보기</span>
-              <select value={filterOffDept} onChange={e=>setFilterOffDept(e.target.value)} style={{padding:"5px 10px",borderRadius:8,border:"1.5px solid #e2e8f0",fontSize:13,color:"#1a2233",outline:"none",fontFamily:"inherit"}}>
+              <span style={{fontSize:11,color:"#66718c"}}>행 더블클릭 → 상세보기</span>
+              <select value={filterOffDept} onChange={e=>setFilterOffDept(e.target.value)} style={{padding:"5px 10px",borderRadius:8,border:"1.5px solid #e3e9f2",fontSize:13,color:"#151c2e",outline:"none",fontFamily:"inherit"}}>
                 {offDepts.map(d=><option key={d}>{d}</option>)}
               </select>
-              <select value={filterOffStatus} onChange={e=>setFilterOffStatus(e.target.value)} style={{padding:"5px 10px",borderRadius:8,border:"1.5px solid #e2e8f0",fontSize:13,color:"#1a2233",outline:"none",fontFamily:"inherit"}}>
+              <select value={filterOffStatus} onChange={e=>setFilterOffStatus(e.target.value)} style={{padding:"5px 10px",borderRadius:8,border:"1.5px solid #e3e9f2",fontSize:13,color:"#151c2e",outline:"none",fontFamily:"inherit"}}>
                 {["전체","완료","진행중","미시작"].map(s=><option key={s}>{s}</option>)}
               </select>
             </div>
           </div>
           {loading?(
-            <div style={{padding:44,textAlign:"center",color:"#8899bb"}}>불러오는 중...</div>
+            <div style={{padding:44,textAlign:"center",color:"#66718c"}}>불러오는 중...</div>
           ):offEmps.length===0?(
-            <div style={{padding:60,textAlign:"center",color:"#8899bb"}}>
+            <div style={{padding:60,textAlign:"center",color:"#66718c"}}>
               <div style={{fontSize:38,marginBottom:10}}>🚪</div>
               <div style={{fontWeight:700,fontSize:15,marginBottom:5}}>등록된 퇴사자가 없습니다</div>
               <div style={{fontSize:13}}>상단 [＋ 퇴사자 등록] 버튼을 눌러 추가하세요</div>
@@ -2280,14 +2280,14 @@ const filteredExt=allExtReqs.filter(r=>{
                   {offFiltered.map(emp=>{
                     const {pct}=calcProgress(offChecksMap[emp.id]||{},offTplOf(emp));
                     const elapsed=daysBetween(emp.leaveDate);
-                    const sc=pct===100?"#27AE60":pct===0?"#8899bb":"#F5A623";
+                    const sc=pct===100?"#27AE60":pct===0?"#66718c":"#F5A623";
                     const st=pct===100?"완료":pct===0?"미시작":"진행중";
                     return(<tr key={emp.id} onClick={()=>handleOffRowClick(emp)}
                       style={{borderBottom:"1px solid #f0f4fa",cursor:"pointer",transition:"background .15s"}}
                       onMouseEnter={e=>e.currentTarget.style.background="#f8faff"}
                       onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
-                      <td style={{padding:"12px 13px",color:"#8899bb",textAlign:"center",fontSize:12}}>{emp.empId||"-"}</td>
-                      <td style={{padding:"12px 13px",fontWeight:700,color:"#1a2233",textAlign:"center"}}>{emp.name}</td>
+                      <td style={{padding:"12px 13px",color:"#66718c",textAlign:"center",fontSize:12}}>{emp.empId||"-"}</td>
+                      <td style={{padding:"12px 13px",fontWeight:700,color:"#151c2e",textAlign:"center"}}>{emp.name}</td>
                       <td style={{padding:"12px 13px",color:"#4a5568",textAlign:"center"}}>{emp.department}</td>
                       <td style={{padding:"12px 13px",color:"#4a5568",textAlign:"center"}}>{emp.position}</td>
                       <td style={{padding:"12px 13px",color:"#4a5568",textAlign:"center"}}>{emp.leaveDate}</td>
@@ -2304,12 +2304,12 @@ const filteredExt=allExtReqs.filter(r=>{
                       <td style={{padding:"12px 13px",textAlign:"center"}}>
                         <div style={{display:"flex",justifyContent:"center",gap:5}}>
                           <SBtn onClick={e=>{e.stopPropagation();openOffEdit(emp);}} bg="#fdf0f6" color="#e84c8b" style={{border:"1px solid #f7cfe0"}}>✏️ 정보변경</SBtn>
-                          <SBtn onClick={e=>{e.stopPropagation();deleteOffboardingEmployee(emp.id);}} bg="#f4f7fb" color="#8899bb" style={{border:"1px solid #e2e8f0"}}>삭제</SBtn>
+                          <SBtn onClick={e=>{e.stopPropagation();deleteOffboardingEmployee(emp.id);}} bg="#f4f7fb" color="#66718c" style={{border:"1px solid #e3e9f2"}}>삭제</SBtn>
                         </div>
                       </td>
                     </tr>);
                   })}
-                  {offFiltered.length===0&&<tr><td colSpan={9} style={{padding:28,textAlign:"center",color:"#8899bb",fontSize:13}}>필터 조건에 맞는 사원이 없습니다.</td></tr>}
+                  {offFiltered.length===0&&<tr><td colSpan={9} style={{padding:28,textAlign:"center",color:"#66718c",fontSize:13}}>필터 조건에 맞는 사원이 없습니다.</td></tr>}
                 </tbody>
               </table>
             </div>
@@ -2330,12 +2330,12 @@ const filteredExt=allExtReqs.filter(r=>{
       return(
         <Modal title={`${isOff?"퇴사자":"입사자"} ${statusModal.status==="완료"?"✅ 완료":"🔄 진행 중"} (${rows.length}명)`}
           onClose={()=>setStatusModal(null)} width={620}>
-          <p style={{fontSize:12,color:"#8899bb",margin:"0 0 10px"}}>행을 클릭하면 그 사람의 체크리스트 상세로 이동합니다.</p>
+          <p style={{fontSize:12,color:"#66718c",margin:"0 0 10px"}}>행을 클릭하면 그 사람의 체크리스트 상세로 이동합니다.</p>
           <div style={{maxHeight:380,overflowY:"auto",border:"1.5px solid #eef1f8",borderRadius:12}}>
             <table style={{width:"100%",borderCollapse:"collapse",fontSize:13}}>
               <thead><tr style={{background:"#f8faff",position:"sticky",top:0}}>
                 {["사번","성명","부서","직급",isOff?"퇴사일":"입사일","완료율"].map(h=>
-                  <th key={h} style={{padding:"9px 11px",textAlign:"center",fontSize:11,fontWeight:700,color:"#8899bb",whiteSpace:"nowrap"}}>{h}</th>)}
+                  <th key={h} style={{padding:"9px 11px",textAlign:"center",fontSize:11,fontWeight:700,color:"#66718c",whiteSpace:"nowrap"}}>{h}</th>)}
               </tr></thead>
               <tbody>
                 {rows.map(e=>{
@@ -2344,15 +2344,15 @@ const filteredExt=allExtReqs.filter(r=>{
                     style={{borderBottom:"1px solid #f0f4fa",cursor:"pointer"}}
                     onMouseEnter={ev=>ev.currentTarget.style.background="#f8faff"}
                     onMouseLeave={ev=>ev.currentTarget.style.background="transparent"}>
-                    <td style={{padding:"10px 11px",textAlign:"center",color:"#8899bb",fontSize:12}}>{e.empId||"-"}</td>
-                    <td style={{padding:"10px 11px",textAlign:"center",fontWeight:700,color:"#1a2233"}}>{e.name}</td>
+                    <td style={{padding:"10px 11px",textAlign:"center",color:"#66718c",fontSize:12}}>{e.empId||"-"}</td>
+                    <td style={{padding:"10px 11px",textAlign:"center",fontWeight:700,color:"#151c2e"}}>{e.name}</td>
                     <td style={{padding:"10px 11px",textAlign:"center",color:"#4a5568"}}>{e.department}</td>
                     <td style={{padding:"10px 11px",textAlign:"center",color:"#4a5568"}}>{e.position}</td>
                     <td style={{padding:"10px 11px",textAlign:"center",color:"#4a5568"}}>{isOff?e.leaveDate:e.joinDate}</td>
                     <td style={{padding:"10px 11px",textAlign:"center",fontWeight:700,color}}>{p}%</td>
                   </tr>);
                 })}
-                {rows.length===0&&<tr><td colSpan={6} style={{padding:24,textAlign:"center",color:"#8899bb",fontSize:13}}>해당하는 인원이 없습니다.</td></tr>}
+                {rows.length===0&&<tr><td colSpan={6} style={{padding:24,textAlign:"center",color:"#66718c",fontSize:13}}>해당하는 인원이 없습니다.</td></tr>}
               </tbody>
             </table>
           </div>
@@ -2378,13 +2378,13 @@ const filteredExt=allExtReqs.filter(r=>{
     )}
 
     {showAddOff&&(
-      <Modal title="퇴사자 등록" onClose={()=>setShowAddOff(false)} titleColor="#E84545">
+      <Modal title="퇴사자 등록" onClose={()=>setShowAddOff(false)} titleColor="#e5484d">
         {[{k:"name",l:"성명 *",p:"홍길동",t:"text"},{k:"empId",l:"사번 *",p:"EMP001",t:"text"},
           {k:"department",l:"부서 *",p:"개발팀",t:"text"},{k:"position",l:"직급 *",p:"사원",t:"text"},
           {k:"leaveDate",l:"퇴사일 *",p:"",t:"date"},{k:"email",l:"이메일",p:"hong@company.com",t:"email"}].map(f=>(
           <Field key={f.k} label={f.l}><FI type={f.t} value={offForm[f.k]} onChange={e=>setOffForm(p=>({...p,[f.k]:e.target.value}))} placeholder={f.p}/></Field>
         ))}
-        <div style={{display:"flex",gap:10,marginTop:14}}><PBtn onClick={addOffboardingEmployee} color="#E84545" style={{flex:1}}>등록</PBtn><OBtn onClick={()=>setShowAddOff(false)} style={{flex:1}}>취소</OBtn></div>
+        <div style={{display:"flex",gap:10,marginTop:14}}><PBtn onClick={addOffboardingEmployee} color="#e5484d" style={{flex:1}}>등록</PBtn><OBtn onClick={()=>setShowAddOff(false)} style={{flex:1}}>취소</OBtn></div>
       </Modal>
     )}
 
@@ -2403,22 +2403,22 @@ const filteredExt=allExtReqs.filter(r=>{
       <Modal title="✏️ 입사자 정보 변경" onClose={()=>{setJoinModal(false);setEditTarget(null);}} width={500}>
         {!editTarget?(
           <>
-            <p style={{fontSize:13,color:"#8899bb",margin:"0 0 12px"}}>수정할 입사자를 선택하세요</p>
-            <div style={{maxHeight:320,overflowY:"auto",border:"1.5px solid #e2e8f0",borderRadius:10,padding:"4px 0"}}>
+            <p style={{fontSize:13,color:"#66718c",margin:"0 0 12px"}}>수정할 입사자를 선택하세요</p>
+            <div style={{maxHeight:320,overflowY:"auto",border:"1.5px solid #e3e9f2",borderRadius:10,padding:"4px 0"}}>
               {employees.map(e=>(
                 <div key={e.id} onClick={()=>selectEditTarget(e)}
                   style={{display:"flex",alignItems:"center",gap:10,padding:"10px 14px",cursor:"pointer",borderBottom:"1px solid #f4f7fa",transition:"background .15s"}}
                   onMouseEnter={ev=>ev.currentTarget.style.background="#f0f5ff"}
                   onMouseLeave={ev=>ev.currentTarget.style.background="transparent"}>
-                  <div style={{width:34,height:34,borderRadius:10,background:"linear-gradient(135deg,#5B6EEA,#7c5ce8)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                  <div style={{width:34,height:34,borderRadius:10,background:"linear-gradient(135deg,#2563eb,#38bdf8)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
                     <span style={{color:"#fff",fontWeight:800,fontSize:13}}>{e.name[0]}</span>
                   </div>
                   <div style={{flex:1}}>
-                    <div style={{fontWeight:700,fontSize:14,color:"#1a2233"}}>{e.name}</div>
-                    <div style={{fontSize:12,color:"#8899bb"}}>{e.empId||"-"} · {e.department} · {e.position}</div>
+                    <div style={{fontWeight:700,fontSize:14,color:"#151c2e"}}>{e.name}</div>
+                    <div style={{fontSize:12,color:"#66718c"}}>{e.empId||"-"} · {e.department} · {e.position}</div>
                   </div>
                   <span style={{fontSize:12,color:"#b0b8c8"}}>{e.joinDate}</span>
-                  <span style={{color:"#5B6EEA",fontSize:13}}>→</span>
+                  <span style={{color:"#2563eb",fontSize:13}}>→</span>
                 </div>
               ))}
               {employees.length===0&&<div style={{padding:"24px",textAlign:"center",color:"#b0b8c8",fontSize:13}}>등록된 입사자가 없습니다.</div>}
@@ -2426,12 +2426,12 @@ const filteredExt=allExtReqs.filter(r=>{
           </>
         ):(
           <>
-            <button onClick={()=>setEditTarget(null)} style={{background:"none",border:"none",color:"#8899bb",fontSize:13,cursor:"pointer",fontFamily:"inherit",fontWeight:600,padding:0,marginBottom:14}}>← 목록으로</button>
+            <button onClick={()=>setEditTarget(null)} style={{background:"none",border:"none",color:"#66718c",fontSize:13,cursor:"pointer",fontFamily:"inherit",fontWeight:600,padding:0,marginBottom:14}}>← 목록으로</button>
             <div style={{background:"#f0f4ff",borderRadius:10,padding:"10px 14px",marginBottom:16,display:"flex",alignItems:"center",gap:10}}>
-              <div style={{width:32,height:32,borderRadius:9,background:"linear-gradient(135deg,#5B6EEA,#7c5ce8)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+              <div style={{width:32,height:32,borderRadius:9,background:"linear-gradient(135deg,#2563eb,#38bdf8)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
                 <span style={{color:"#fff",fontWeight:800,fontSize:12}}>{editTarget.name[0]}</span>
               </div>
-              <span style={{fontWeight:700,fontSize:14,color:"#1a2233"}}>{editTarget.name} 정보 수정</span>
+              <span style={{fontWeight:700,fontSize:14,color:"#151c2e"}}>{editTarget.name} 정보 수정</span>
             </div>
             {[{k:"name",l:"성명 *",t:"text",p:"홍길동"},{k:"empId",l:"사번 *",t:"text",p:"EMP001"},
               {k:"department",l:"부서 *",t:"text",p:"개발팀"},{k:"position",l:"직급 *",t:"text",p:"사원"},
@@ -2442,7 +2442,7 @@ const filteredExt=allExtReqs.filter(r=>{
               </Field>
             ))}
             <div style={{display:"flex",gap:10,marginTop:6}}>
-              <PBtn onClick={saveEditEmp} color="#5B6EEA" style={{flex:1}}>저장</PBtn>
+              <PBtn onClick={saveEditEmp} color="#2563eb" style={{flex:1}}>저장</PBtn>
               <OBtn onClick={()=>{setJoinModal(false);setEditTarget(null);}} style={{flex:1}}>취소</OBtn>
             </div>
           </>

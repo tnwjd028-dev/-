@@ -1867,9 +1867,8 @@ function AdminDashboard({onBack}){
   }
   const sortableTh=(cols,sort,setSort)=>cols.map(c=>(
     <th key={c.h}
-      onClick={c.k?()=>setSort({key:c.k,dir:1}):undefined}
-      onDoubleClick={c.k?()=>setSort({key:c.k,dir:-1}):undefined}
-      title={c.k?"클릭: 오름차순 · 더블클릭: 내림차순":undefined}
+      onClick={c.k?()=>setSort(s=>s.key===c.k?{key:c.k,dir:-s.dir}:{key:c.k,dir:1}):undefined}
+      title={c.k?"클릭할 때마다 오름차순 ↔ 내림차순":undefined}
       style={{padding:"10px 13px",textAlign:"center",fontSize:11,fontWeight:700,
         color:sort.key===c.k?"#5B6EEA":"#8899bb",letterSpacing:".4px",whiteSpace:"nowrap",
         cursor:c.k?"pointer":"default",userSelect:"none"}}>

@@ -1679,6 +1679,45 @@ const rankOfPos=p=>{
   return 99; // 서열 미정 (미정·공란 등)
 };
 const empIdNum=s=>{const m=String(s||"").match(/\d+/);return m?parseInt(m[0],10):Number.MAX_SAFE_INTEGER;};
+
+// 통계 탭 — 채용 대시보드와 같은 문법의 KPI 타일·꺾은선 그래프
+function Kpi({v,l,color}){
+  return(<div style={{flex:"1 1 120px",background:"linear-gradient(135deg,#f4f8ff,#fff)",border:"1px solid #e3e9f2",borderRadius:12,padding:"12px 14px"}}>
+    <div style={{fontSize:22,fontWeight:800,letterSpacing:"-.5px",color:color||"#151c2e"}}>{v}</div>
+    <div style={{fontSize:11.5,color:"#66718c",marginTop:2}}>{l}</div>
+  </div>);
+}
+function LineChartSvg({labels,series,height=230,width=620}){
+  const L=46,R=14,T=16,B=40,iw=width-L-R,ih=height-T-B;
+  const max=Math.max(1,...series.flatMap(s=>s.values));
+  const rawStep=max/4,mag=Math.pow(10,Math.floor(Math.log10(rawStep)));
+  const tickStep=[1,2,2.5,5,10].map(m=>m*mag).find(s=>s*4>=max)||10*mag;
+  const nice=tickStep*4;
+  const x=i=>L+(labels.length===1?iw/2:iw*i/(labels.length-1));
+  const y=v=>T+ih-(ih*v/nice);
+  return(<div>
+    <div style={{display:"flex",gap:12,flexWrap:"wrap",fontSize:11.5,color:"#66718c",marginBottom:4}}>
+      {series.map(s=>(<span key={s.name}>
+        <i style={{display:"inline-block",width:10,height:10,borderRadius:3,marginRight:4,verticalAlign:-1,background:s.color}}/>{s.name}
+      </span>))}
+    </div>
+    <svg viewBox={`0 0 ${width} ${height}`} style={{width:"100%",height:"auto",display:"block"}} role="img">
+      {[0,1,2,3,4].map(k=>{const v=nice*k/4,yy=y(v);return(<g key={k}>
+        <line x1={L} y1={yy} x2={width-R} y2={yy} stroke="#eceff6"/>
+        <text x={L-8} y={yy+4} textAnchor="end" fontSize="10" fill="#8b93a7">{Number.isInteger(v)?v:Math.round(v*10)/10}</text>
+      </g>);})}
+      {labels.map((lb,i)=>(<text key={lb} x={x(i)} y={height-B+16} textAnchor="middle" fontSize="10" fill="#69718c">{lb}</text>))}
+      <line x1={L} y1={T} x2={L} y2={height-B} stroke="#dfe3ee"/>
+      <line x1={L} y1={height-B} x2={width-R} y2={height-B} stroke="#dfe3ee"/>
+      {series.map(s=>(<g key={s.name}>
+        <polyline points={s.values.map((v,i)=>`${x(i)},${y(v)}`).join(" ")} fill="none" stroke={s.color} strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round"/>
+        {s.values.map((v,i)=>(<circle key={i} cx={x(i)} cy={y(v)} r="3.6" fill="#fff" stroke={s.color} strokeWidth="2">
+          <title>{`${labels[i]} · ${s.name} ${v}명${s.rates&&s.rates[i]?` (${s.rates[i]})`:""}`}</title>
+        </circle>))}
+      </g>))}
+    </svg>
+  </div>);
+}
 function AdminDashboard({onBack}){
   const [employees,setEmployees]=useState([]);
   const [checksMap,setChecksMap]=useState({});
@@ -2086,7 +2125,7 @@ const filteredExt=allExtReqs.filter(r=>{
         </div>
       )}
 
-      {/* ── 통계 탭: 월간·연간 입퇴사 현황과 비율 ── */}
+      {/* ── 통계 탭: 채용 대시보드 통계와 같은 문법 (KPI 타일 + 꺾은선 그래프 + 표) ── */}
       {activeTab==="stats"&&(()=>{
         const ym=d=>String(d||"").slice(0,7), yy=d=>String(d||"").slice(0,4);
         const now=new Date();
@@ -2094,48 +2133,52 @@ const filteredExt=allExtReqs.filter(r=>{
         for(let i=11;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);months.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`);}
         const joinM=months.map(m=>employees.filter(e=>ym(e.joinDate)===m).length);
         const leaveM=months.map(m=>offEmps.filter(e=>ym(e.leaveDate)===m).length);
-        const maxM=Math.max(...joinM,...leaveM,1);
-        const years=[...new Set([...employees.map(e=>yy(e.joinDate)),...offEmps.map(e=>yy(e.leaveDate))])].filter(y=>y&&y!=="unde").sort();
+        const years=[...new Set([...employees.map(e=>yy(e.joinDate)),...offEmps.map(e=>yy(e.leaveDate))])].filter(Boolean).sort();
         const base=parseInt(headcount,10)||0;
         const rate=n=>base>0?((n/base)*100).toFixed(1)+"%":"—";
-        const card={background:"#fff",borderRadius:16,boxShadow:"0 2px 14px rgba(30,50,120,.07)",padding:"18px 22px",marginBottom:16};
+        const thisYear=String(now.getFullYear());
+        const joinY=employees.filter(e=>yy(e.joinDate)===thisYear).length;
+        const leaveY=offEmps.filter(e=>yy(e.leaveDate)===thisYear).length;
+        const card={background:"#fff",border:"1px solid #e3e9f2",borderRadius:14,padding:"16px 18px",boxShadow:"0 1px 3px rgba(23,28,55,.07)",marginBottom:14};
+        const h3={fontSize:14.5,fontWeight:800,color:"#151c2e",margin:"0 0 4px",letterSpacing:"-.2px"};
+        const sub={fontSize:11.5,color:"#66718c",marginBottom:12,lineHeight:1.6};
         return(<div>
-          <div style={{...card,display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
-            <span style={{fontWeight:700,fontSize:14,color:"#151c2e"}}>입·퇴사율 기준 인원(현재 재직 인원)</span>
-            <input type="number" value={headcount} onChange={e=>setHeadcount(e.target.value)} placeholder="예: 233"
-              style={{width:90,padding:"6px 10px",borderRadius:8,border:"1.5px solid #e3e9f2",fontSize:13,fontFamily:"inherit",outline:"none"}}/>
-            <span style={{fontSize:13,color:"#66718c"}}>명</span>
-            <SBtn onClick={async()=>{await save("stats_headcount",parseInt(headcount,10)||0,true);toast("기준 인원을 저장했습니다.","success");}} bg="#2563eb" color="#fff" style={{padding:"6px 14px"}}>저장</SBtn>
-            <span style={{fontSize:11,color:"#b0b8c8"}}>※ 통계는 이 사이트에 등록된 입·퇴사자 기준이며, 비율 = 인원수 ÷ 기준 인원</span>
+          <div style={card}>
+            <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",flexWrap:"wrap",gap:10}}>
+              <div>
+                <h3 style={h3}>{thisYear}년 한눈에 보기</h3>
+                <div style={sub}>이 사이트에 등록된 입·퇴사자 기준 · 비율 = 인원수 ÷ 기준 인원</div>
+              </div>
+              <div style={{display:"flex",alignItems:"center",gap:7,flexWrap:"wrap"}}>
+                <span style={{fontSize:12,fontWeight:700,color:"#66718c"}}>기준 인원</span>
+                <input type="number" value={headcount} onChange={e=>setHeadcount(e.target.value)} placeholder="예: 233"
+                  style={{width:84,padding:"7px 10px",borderRadius:10,border:"1.5px solid #e3e9f2",fontSize:13,fontFamily:"inherit",outline:"none"}}/>
+                <span style={{fontSize:12,color:"#66718c"}}>명</span>
+                <SBtn onClick={async()=>{await save("stats_headcount",parseInt(headcount,10)||0,true);toast("기준 인원을 저장했습니다.","success");}} bg="#2563eb" color="#fff" style={{padding:"7px 14px",borderRadius:10}}>저장</SBtn>
+              </div>
+            </div>
+            <div style={{display:"flex",gap:10,flexWrap:"wrap",marginTop:6}}>
+              <Kpi v={`${joinY}명`} l={`${thisYear}년 입사`} color="#2563eb"/>
+              <Kpi v={rate(joinY)} l="입사율" color="#2563eb"/>
+              <Kpi v={`${leaveY}명`} l={`${thisYear}년 퇴사`} color="#e5484d"/>
+              <Kpi v={rate(leaveY)} l="퇴사율" color="#e5484d"/>
+              <Kpi v={`${joinY-leaveY>=0?"+":""}${joinY-leaveY}명`} l="순증감" color={joinY-leaveY>=0?"#2f9e44":"#e5484d"}/>
+            </div>
           </div>
           <div style={card}>
-            <div style={{fontWeight:700,fontSize:15,color:"#151c2e",marginBottom:14}}>월간 입·퇴사 (최근 12개월) <span style={{fontSize:11,fontWeight:500,color:"#b0b8c8"}}>— 인원수 · 월간 입/퇴사율</span></div>
-            <div style={{display:"flex",gap:14,marginBottom:10,fontSize:12,color:"#66718c"}}>
-              <span><span style={{display:"inline-block",width:10,height:10,background:"#2563eb",borderRadius:3,marginRight:5}}/>입사</span>
-              <span><span style={{display:"inline-block",width:10,height:10,background:"#e84c8b",borderRadius:3,marginRight:5}}/>퇴사</span>
-            </div>
-            {months.map((m,i)=>(
-              <div key={m} style={{display:"flex",alignItems:"center",gap:10,marginBottom:7}}>
-                <span style={{fontSize:12,color:"#66718c",minWidth:58,fontVariantNumeric:"tabular-nums"}}>{m}</span>
-                <div style={{flex:1}}>
-                  <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:2}}>
-                    <div style={{flex:1,height:9,background:"#eef1f8",borderRadius:5,overflow:"hidden"}}>
-                      <div style={{height:"100%",width:`${(joinM[i]/maxM)*100}%`,background:"#2563eb",borderRadius:5,transition:"width .4s"}}/>
-                    </div>
-                    <span style={{fontSize:11,fontWeight:700,color:"#2563eb",minWidth:64,textAlign:"right"}}>{joinM[i]?`${joinM[i]}명${base>0?` · ${rate(joinM[i])}`:""}`:""}</span>
-                  </div>
-                  <div style={{display:"flex",alignItems:"center",gap:6}}>
-                    <div style={{flex:1,height:9,background:"#eef1f8",borderRadius:5,overflow:"hidden"}}>
-                      <div style={{height:"100%",width:`${(leaveM[i]/maxM)*100}%`,background:"#e84c8b",borderRadius:5,transition:"width .4s"}}/>
-                    </div>
-                    <span style={{fontSize:11,fontWeight:700,color:"#e84c8b",minWidth:64,textAlign:"right"}}>{leaveM[i]?`${leaveM[i]}명${base>0?` · ${rate(leaveM[i])}`:""}`:""}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
+            <h3 style={h3}>월간 입·퇴사 추이</h3>
+            <div style={sub}>최근 12개월 — 점에 마우스를 올리면 인원수와 비율이 보입니다</div>
+            <LineChartSvg labels={months.map(m=>m.slice(2))}
+              series={[
+                {name:"입사",color:"#2563eb",values:joinM,rates:base>0?joinM.map(rate):null},
+                {name:"퇴사",color:"#e84c8b",values:leaveM,rates:base>0?leaveM.map(rate):null},
+              ]}/>
           </div>
           <div style={{...card,padding:0,overflow:"hidden"}}>
-            <div style={{fontWeight:700,fontSize:15,color:"#151c2e",padding:"15px 22px",borderBottom:"1px solid #f0f4fa"}}>연간 입·퇴사율</div>
+            <div style={{padding:"15px 18px 11px"}}>
+              <h3 style={h3}>연간 입·퇴사율</h3>
+              <div style={{...sub,marginBottom:0}}>연도별 인원수와 기준 인원 대비 비율</div>
+            </div>
             <table style={{width:"100%",borderCollapse:"collapse",fontSize:14}}>
               <thead><tr style={{background:"#f8faff"}}>
                 {["연도","입사","입사율","퇴사","퇴사율","순증감"].map(h=>
@@ -2151,7 +2194,7 @@ const filteredExt=allExtReqs.filter(r=>{
                     <td style={{padding:"11px",textAlign:"center",color:"#2563eb"}}>{rate(j)}</td>
                     <td style={{padding:"11px",textAlign:"center",color:"#e84c8b",fontWeight:700}}>{l}명</td>
                     <td style={{padding:"11px",textAlign:"center",color:"#e84c8b"}}>{rate(l)}</td>
-                    <td style={{padding:"11px",textAlign:"center",fontWeight:700,color:j-l>=0?"#27AE60":"#e5484d"}}>{j-l>=0?"+":""}{j-l}명</td>
+                    <td style={{padding:"11px",textAlign:"center",fontWeight:700,color:j-l>=0?"#2f9e44":"#e5484d"}}>{j-l>=0?"+":""}{j-l}명</td>
                   </tr>);
                 })}
                 {years.length===0&&<tr><td colSpan={6} style={{padding:26,textAlign:"center",color:"#66718c",fontSize:13}}>데이터가 없습니다.</td></tr>}

@@ -361,8 +361,10 @@ function UserChecklist({employee,onBack}){
       load(`checks_${employee.id}`,true), load("checklist_template",true),
       load(`item_overrides_${employee.id}`,true), load(`item_notes_${employee.id}`,true),
       load(`ext_requests_${employee.id}`,true), load(`survey_on_${employee.id}`,true),
-    ]).then(([c,t,ov,n,er,sv])=>{
-      setChecks(c||{}); setTpl(t||DEFAULT_TEMPLATE); setItemOverrides(ov||{}); setNotes(n||{}); setExtReqs(er||[]);
+      load(`emp_tpl_${employee.id}`,true),
+    ]).then(([c,t,ov,n,er,sv,pt])=>{
+      // 개인 명단이 있으면 그것을 먼저 쓴다 (인사팀이 이 사람 항목을 지웠을 수 있다)
+      setChecks(c||{}); setTpl(pt||t||DEFAULT_TEMPLATE); setItemOverrides(ov||{}); setNotes(n||{}); setExtReqs(er||[]);
       if(sv&&!sv.reloginApproved)setSurveyDone(true);
       if(sv)setPrevSurvey(sv);
       setLoading(false);
@@ -793,16 +795,24 @@ function AdminDetail({employee:initEmp,checks:initChecks,tpl:initTpl,onBack}){
   // ext panel: null | "all" | "pending" | "approved"
   const [extPanel,setExtPanel]=useState(null);
 const [rejectModal,setRejectModal]=useState(null);
+  const [resetConfirm,setResetConfirm]=useState(false);
+  const [trash,setTrash]=useState([]);            // 이 사람 명단에서 뺀 항목 (되살릴 수 있게 보관)
 const [rejectReason,setRejectReason]=useState("");
     useEffect(()=>{
-    Promise.all([load(`emp_tpl_${emp.id}`,true),load(`item_overrides_${emp.id}`,true),load(`item_notes_${emp.id}`,true),load(`ext_requests_${emp.id}`,true)])
-      .then(([empTpl,ov,n,er])=>{
+    Promise.all([load(`emp_tpl_${emp.id}`,true),load(`item_overrides_${emp.id}`,true),load(`item_notes_${emp.id}`,true),load(`ext_requests_${emp.id}`,true),load(`emp_tpl_trash_${emp.id}`,true)])
+      .then(([empTpl,ov,n,er,tr])=>{
         if(empTpl) setTpl(empTpl);
-        setItemOverrides(ov||{});setNotes(n||{});setExtReqs(er||[]);});
+        setItemOverrides(ov||{});setNotes(n||{});setExtReqs(er||[]);setTrash(tr||[]);});
   }, [emp.id]);
 
   // Auto-save helpers — persist immediately on every change
-  async function updTpl(next){setTpl(next);await save(`emp_tpl_${emp.id}`,next,true);toast("자동 저장되었습니다.","success");}
+  async function updTpl(next){
+    setTpl(next);
+    // 공용 명단과 똑같아지면 개인 칸을 비워 둔다 — 그래야 나중에 공용 명단이 바뀔 때 이 사람도 따라간다
+    const 공용과같음 = JSON.stringify(next)===JSON.stringify(initTpl);
+    await save(`emp_tpl_${emp.id}`,공용과같음?null:next,true);
+    toast("자동 저장되었습니다.","success");
+  }
   async function updOv(next){setItemOverrides(next);await save(`item_overrides_${emp.id}`,next,true);toast("자동 저장되었습니다.","success");}
   async function updNotes(next){setNotes(next);await save(`item_notes_${emp.id}`,next,true);}
 
@@ -863,16 +873,55 @@ const [rejectReason,setRejectReason]=useState("");
     updTpl(tpl.map(c=>c.id===addItemCatId?{...c,items:[...c.items,{id:uid(),label:newItemLabel.trim()}]}:c));
     setAddItemCatId(null); setNewItemLabel("");
   }
-  function confirmDeleteItem(catId,itemId){setDeleteConfirm({type:"item",catId,itemId});}
-  function confirmDeleteCat(catId){setDeleteConfirm({type:"cat",catId});}
-  function executeDelete(){
-    if(deleteConfirm.type==="item"){
-      updTpl(tpl.map(c=>c.id===deleteConfirm.catId?{...c,items:c.items.filter(i=>i.id!==deleteConfirm.itemId)}:c));
-      if(selectedItem?.itemId===deleteConfirm.itemId)setSelectedItem(null);
+  function confirmDeleteItem(catId,itemId,label){setDeleteConfirm({type:"item",catId,itemId,label});}
+  function confirmDeleteCat(catId,label){setDeleteConfirm({type:"cat",catId,label});}
+  // 뺀 항목은 지우지 않고 보관함에 담는다 — 실수로 눌러도 되살릴 수 있게 (2026-10-02 검토)
+  function 보관칸(cat,item,자리){
+    return {catId:cat.id,catName:cat.category,catDueDays:cat.dueDays,catColor:cat.color,
+            idx:자리,node:item,at:Date.now()};
+  }
+  async function pushTrash(칸들){
+    if(!칸들.length)return;
+    const next=[...칸들,...trash].slice(0,50);
+    setTrash(next); await save(`emp_tpl_trash_${emp.id}`,next,true);
+  }
+  async function executeDelete(){
+    const d=deleteConfirm; setDeleteConfirm(null);
+    const cat=tpl.find(c=>c.id===d.catId); if(!cat)return;
+    if(d.type==="item"){
+      const 자리=cat.items.findIndex(i=>i.id===d.itemId); if(자리<0)return;
+      await pushTrash([보관칸(cat,cat.items[자리],자리)]);
+      updTpl(tpl.map(c=>c.id===d.catId?{...c,items:c.items.filter(i=>i.id!==d.itemId)}:c));
+      if(selectedItem?.itemId===d.itemId)setSelectedItem(null);
     } else {
-      updTpl(tpl.filter(c=>c.id!==deleteConfirm.catId));
+      await pushTrash(cat.items.map((it,i)=>보관칸(cat,it,i)));
+      updTpl(tpl.filter(c=>c.id!==d.catId));
+      if(selectedItem?.catId===d.catId)setSelectedItem(null);   // 지운 카테고리의 항목이 선택된 채 남지 않게
     }
-    setDeleteConfirm(null);
+  }
+  async function restoreTrash(칸){
+    let next=tpl;
+    if(!next.find(c=>c.id===칸.catId))                     // 카테고리째 지웠으면 껍데기부터 되살린다
+      next=[...next,{id:칸.catId,category:칸.catName,dueDays:칸.catDueDays,color:칸.catColor,items:[]}];
+    next=next.map(c=>{
+      if(c.id!==칸.catId||c.items.some(i=>i.id===칸.node.id))return c;
+      const items=[...c.items]; items.splice(Math.min(칸.idx,items.length),0,칸.node);
+      return {...c,items};
+    });
+    const 남은것=trash.filter(t=>t!==칸);
+    setTrash(남은것); await save(`emp_tpl_trash_${emp.id}`,남은것,true);
+    updTpl(next); toast("되살렸습니다 — 체크·메모·첨부도 그대로입니다.","success");
+  }
+  async function resetTpl(){
+    setResetConfirm(false); setSelectedItem(null);
+    const 공용 = new Set(initTpl.flatMap(c=>c.items.map(i=>i.id)));
+    const 개인만=[];                                       // 이 사람에게만 더했던 항목은 보관함으로
+    tpl.forEach(c=>c.items.forEach((it,i)=>{ if(!공용.has(it.id)) 개인만.push(보관칸(c,it,i)); }));
+    await pushTrash(개인만);
+    setTpl(initTpl);
+    // 사본을 남기면 그 사람만 공용 명단과 영원히 갈라진다 — 칸을 비워 공용 명단을 다시 따라가게
+    await save(`emp_tpl_${emp.id}`,null,true);
+    toast("기본 명단으로 되돌렸습니다.","success");
   }
   function applyAddCat(){
     if(!newCat.category.trim()){toast("카테고리명을 입력하세요.","warning");return;}
@@ -925,7 +974,7 @@ const [rejectReason,setRejectReason]=useState("");
   }
   function deleteNote(itemId){const next={...notes};delete next[itemId];updNotes(next);}
 
-  function deleteFromToolbar(){if(!selectedItem){toast("항목을 먼저 선택해주세요.","warning");return;}confirmDeleteItem(selectedItem.catId,selectedItem.itemId);}
+  function deleteFromToolbar(){if(!selectedItem){toast("항목을 먼저 선택해주세요.","warning");return;}confirmDeleteItem(selectedItem.catId,selectedItem.itemId,selectedItem.label);}
 
   function handleExtTabClick(key){setExtPanel(p=>p===key?null:key);}
 
@@ -958,6 +1007,8 @@ async function submitReject(){
   const {done,total,pct}=calcProgress(checks,tpl);
   const elapsed=daysBetween(emp.joinDate);
   const toolbarActive=!!selectedItem;
+  // 이 사람 명단이 공용 명단과 달라졌는지 (항목을 지웠거나 더했거나 이름을 고친 경우)
+  const isCustomTpl=JSON.stringify(tpl)!==JSON.stringify(initTpl);
 
   const cntAllExt=extReqs.length, cntPendingExt=extReqs.filter(r=>r.status==="pending").length, cntApprovedExt=extReqs.filter(r=>r.status==="approved").length;
 
@@ -1002,7 +1053,7 @@ const filteredExtReqs=extReqs.slice().reverse().filter(r=>{
             <div style={{width:1,height:28,background:"rgba(255,255,255,.2)",margin:"0 2px"}}/>
             <SBtn onClick={openBulkDue}     bg="rgba(255,255,255,.18)" hoverBg="rgba(255,255,255,.35)" color="#fff" style={{padding:"5px 9px",fontSize:11,borderRadius:7,border:"1px solid rgba(255,255,255,.3)"}}>📅 기한일괄</SBtn>
             <SBtn onClick={()=>setAddCatModal(true)} bg="rgba(255,255,255,.18)" hoverBg="rgba(255,255,255,.35)" color="#fff" style={{padding:"5px 9px",fontSize:11,borderRadius:7,border:"1px solid rgba(255,255,255,.3)"}}>＋ 카테고리</SBtn>
-            <SBtn onClick={()=>{if(window.confirm("템플릿을 기본값으로 초기화하시겠습니까?\n현재 카테고리와 항목이 초기화됩니다."))updTpl(DEFAULT_TEMPLATE);}} bg="rgba(255,255,255,.18)" hoverBg="rgba(255,255,255,.35)" color="#fff" style={{padding:"5px 9px",fontSize:11,borderRadius:7,border:"1px solid rgba(255,255,255,.3)"}}>↩️ 템플릿초기화</SBtn>
+            {isCustomTpl&&<SBtn onClick={()=>setResetConfirm(true)} bg="rgba(255,255,255,.18)" hoverBg="rgba(255,255,255,.35)" color="#fff" style={{padding:"5px 9px",fontSize:11,borderRadius:7,border:"1px solid rgba(255,255,255,.3)"}}>↩️ 기본 명단으로</SBtn>}
             <SBtn onClick={sendAllMail}     bg="rgba(255,255,255,.18)" hoverBg="rgba(255,255,255,.35)" color="#fff" style={{padding:"5px 9px",fontSize:11,borderRadius:7,border:"1px solid rgba(255,255,255,.3)"}}>📧 일괄알림</SBtn>
           </div>
         </div>
@@ -1095,6 +1146,15 @@ const filteredExtReqs=extReqs.slice().reverse().filter(r=>{
 
     {/* ── BODY ── */}
     <div style={{maxWidth:960,margin:"0 auto",padding:"22px 14px"}}>
+      {isCustomTpl&&(
+        <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap",background:"#fffbf0",
+          border:"1px solid #F5A62340",borderRadius:12,padding:"10px 14px",marginBottom:16}}>
+          <span style={{fontSize:12,color:"#8a6d1f",fontWeight:600,flex:1,minWidth:200,lineHeight:1.6}}>
+            이 명단은 <strong>{emp.name}</strong> 님에게만 적용되는 개인 명단입니다. 다른 분들 명단은 그대로입니다.
+          </span>
+          <SBtn onClick={()=>setResetConfirm(true)} bg="#fff3cc" color="#c07800" style={{fontSize:11}}>↩️ 기본 명단으로 되돌리기</SBtn>
+        </div>
+      )}
       {tpl.map(cat=>{
         const catDone=cat.items.filter(i=>checks[i.id]).length;
         const overCount=cat.items.filter(i=>!checks[i.id]&&isOverdue(emp.joinDate,getEffDue(i.id,cat.dueDays,itemOverrides),false)).length;
@@ -1135,7 +1195,7 @@ const filteredExtReqs=extReqs.slice().reverse().filter(r=>{
                 {overCount>0&&<Badge text={`기한초과 ${overCount}개`} color="#e5484d"/>}
                 <span style={{fontSize:13,color:"#6b7a99",fontWeight:600}}>{catDone}/{cat.items.length}</span>
                 <SBtn onClick={()=>setAddItemCatId(cat.id)} bg="#e8f5e9" color="#27AE60">＋ 항목추가</SBtn>
-                <SBtn onClick={()=>confirmDeleteCat(cat.id)} bg="#fff0f0" color="#e5484d">🗑 카테고리삭제</SBtn>
+                <SBtn onClick={()=>confirmDeleteCat(cat.id,cat.category)} bg="#fff0f0" color="#e5484d">🗑 카테고리삭제</SBtn>
               </div>
             </div>
           </div>
@@ -1151,7 +1211,7 @@ const filteredExtReqs=extReqs.slice().reverse().filter(r=>{
             const pendingExt=extReqs.find(r=>r.itemId===item.id&&r.status==="pending");
             return(<div key={item.id}>
               <div onClick={()=>setSelectedItem(isSelected?null:{itemId:item.id,catId:cat.id,label:item.label,catDueDays:cat.dueDays})}
-                style={{display:"flex",alignItems:"center",gap:9,padding:"10px 16px",
+                style={{display:"flex",alignItems:"center",gap:9,flexWrap:"wrap",padding:"10px 16px",
                   background:isSelected?"#f0f5ff":done?"#f6fff9":over?"#fff8f8":"#fff",
                   borderBottom:note?"none":"1px solid #f4f7fa",
                   outline:isSelected?"2px solid #2563eb":"none",outlineOffset:"-2px",
@@ -1172,7 +1232,7 @@ const filteredExtReqs=extReqs.slice().reverse().filter(r=>{
                     <SBtn onClick={()=>setEditItemId(null)} bg="#f0f4fa" color="#66718c" style={{fontSize:11}}>취소</SBtn>
                   </div>
                 ):(
-                  <span style={{fontSize:14,color:done?"#6b8c7a":"#151c2e",textDecoration:done?"line-through":"none",flex:1}}>{item.label}</span>
+                  <span style={{fontSize:14,color:done?"#6b8c7a":"#151c2e",textDecoration:done?"line-through":"none",flex:"1 1 120px"}}>{item.label}</span>
                 )}
                 {hasOv&&<Badge text={`${fmtD(effDue)} (개별)`} color="#9B59B6"/>}
                 {over&&!done&&<Badge text="기한초과" color="#e5484d"/>}
@@ -1180,6 +1240,9 @@ const filteredExtReqs=extReqs.slice().reverse().filter(r=>{
                 {note&&<span title="메모 있음" style={{fontSize:14}}>💬</span>}
                 {isSelected&&<span style={{fontSize:10,color:"#2563eb",fontWeight:700}}>선택됨</span>}
                 <AttachBtn itemId={item.id} empId={emp.id} prefix="on"/>
+                <SBtn onClick={e=>{e.stopPropagation();confirmDeleteItem(cat.id,item.id,item.label);}}
+                  bg="#f0f4fa" color="#8a94ab" style={{fontSize:11,padding:"5px 9px",marginLeft:6,minWidth:32}}
+                  title={`${emp.name} 님 명단에서만 이 항목 빼기 (되살릴 수 있습니다)`}>🗑</SBtn>
               </div>
               {note&&(
                 <div style={{padding:"6px 16px 9px 47px",background:done?"#f6fff9":over?"#fff8f8":"#fff",borderBottom:"1px solid #f4f7fa"}}>
@@ -1200,11 +1263,35 @@ const filteredExtReqs=extReqs.slice().reverse().filter(r=>{
           })}
         </div>);
       })}
+      {trash.length>0&&(
+        <div style={{background:"#fff",borderRadius:16,padding:"14px 16px",marginBottom:20,
+          boxShadow:"0 2px 10px rgba(30,50,120,.06)"}}>
+          <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap",marginBottom:4}}>
+            <span style={{fontSize:13,fontWeight:700,color:"#151c2e"}}>🗂 {emp.name} 님 명단에서 뺀 항목 {trash.length}개</span>
+            <span style={{fontSize:11,color:"#8a94ab",flex:"1 1 160px"}}>되살리면 체크·메모·첨부도 그대로 돌아옵니다</span>
+          </div>
+          {trash.map((t,i)=>(
+            <div key={(t.node?.id||"")+"_"+i} style={{display:"flex",alignItems:"center",gap:9,
+              flexWrap:"wrap",padding:"8px 2px",borderTop:"1px solid #f4f7fa"}}>
+              <span style={{fontSize:13,color:"#66718c",flex:"1 1 140px"}}>{t.node?.label}</span>
+              <Badge text={t.catName} color="#8a94ab"/>
+              <SBtn onClick={()=>restoreTrash(t)} bg="#e8f5e9" color="#27AE60" style={{fontSize:11}}>되살리기</SBtn>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
     
 
     {/* ── MODALS ── */}
-    {deleteConfirm&&<ConfirmDialog message={deleteConfirm.type==="item"?"이 항목을 삭제하시겠습니까?":"이 카테고리와 모든 항목을 삭제하시겠습니까?"} onYes={executeDelete} onNo={()=>setDeleteConfirm(null)} yesLabel="Yes" noLabel="No"/>}
+    {deleteConfirm&&<ConfirmDialog onYes={executeDelete} onNo={()=>setDeleteConfirm(null)} yesLabel="삭제" noLabel="취소"
+      message={<><strong>{emp.name}</strong> 님의 명단에서<br/>
+        <strong>“{deleteConfirm.label}”</strong> {deleteConfirm.type==="item"?"항목을":"카테고리와 그 안의 항목을 모두"} 지웁니다.<br/>
+        <span style={{fontSize:13,fontWeight:500,color:"#66718c"}}>다른 분들 명단에는 그대로 남습니다.</span></>}/>}
+    {resetConfirm&&<ConfirmDialog onYes={resetTpl} onNo={()=>setResetConfirm(false)}
+      yesColor="#F5A623" yesLabel="되돌리기" noLabel="취소"
+      message={<><strong>{emp.name}</strong> 님의 명단을 회사 기본 명단으로 되돌립니다.<br/>
+        <span style={{fontSize:13,fontWeight:500,color:"#66718c"}}>이 분에게만 했던 항목·카테고리 추가·삭제·이름 수정과 카테고리 기한이 기본값으로 돌아갑니다. 이 분에게만 더했던 항목은 아래 ‘뺀 항목’ 에 담아 두니 다시 살릴 수 있습니다. 체크 기록·메모·첨부파일·항목별 개별 기한은 그대로 남습니다.</span></>}/>}
 
     {addItemCatId&&(
       <Modal title="항목 추가" onClose={()=>{setAddItemCatId(null);setNewItemLabel("");}}>

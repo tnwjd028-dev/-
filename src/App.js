@@ -1791,9 +1791,10 @@ function AdminDashboard({onBack}){
   const [reloginReqs,setReloginReqs]=useState([]);
   const [reloginPanel,setReloginPanel]=useState(false);
 
-  // 정렬 (클릭: 오름차순, 더블클릭: 내림차순)
-  const [sortOn,setSortOn]=useState({key:"joinDate",dir:1});
-  const [sortOff,setSortOff]=useState({key:"leaveDate",dir:1});
+  // 정렬 (머리글을 클릭할 때마다 오름차순 ↔ 내림차순)
+  // 명단을 처음 열면 날짜가 가장 최근인 사람이 맨 위에 오게 한다 (2026-10-02 요청)
+  const [sortOn,setSortOn]=useState({key:"joinDate",dir:-1});
+  const [sortOff,setSortOff]=useState({key:"leaveDate",dir:-1});
   // 완료/진행 중 카드 더블클릭 상세
   const [statusModal,setStatusModal]=useState(null); // {tab:"on"|"off", status:"완료"|"진행중"}
   const [kpiModal,setKpiModal]=useState(null); // 통계 '한눈에 보기' 더블클릭 상세: "join"|"leave"|"net"

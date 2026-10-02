@@ -1794,7 +1794,7 @@ function RankRows({rows,bar,badgeColor,badgeBg,badgeLine,base}){
       </div>))}
   </div>);
 }
-function LineChartSvg({labels,series,height=230,width=620}){
+function LineChartSvg({labels,series,height=230,width=620,onMonthDbl}){
   const [tip,setTip]=useState(null); // 마우스가 올라간 달의 순번
   const L=46,R=14,T=16,B=40,iw=width-L-R,ih=height-T-B;
   const max=Math.max(1,...series.flatMap(s=>s.values));
@@ -1825,12 +1825,20 @@ function LineChartSvg({labels,series,height=230,width=620}){
           <polyline points={s.values.map((v,i)=>`${x(i)},${y(v)}`).join(" ")} fill="none" stroke={s.color} strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round"/>
           {s.values.map((v,i)=>(<circle key={i} cx={x(i)} cy={y(v)} r={tip===i?4.6:3.6} fill="#fff" stroke={s.color} strokeWidth="2"/>))}
         </g>))}
-        {/* 마우스 감지 영역 — 달 단위 세로 띠 (점이 작아도 어디서든 잡히게) */}
+        {/* 고른 달 강조 — 보기용이라 마우스는 받지 않는다 (모양은 예전 그대로) */}
+        {tip!=null&&(()=>{const bx=Math.max(L,x(tip)-bandW/2);
+          return(<rect x={bx} y={T} width={Math.min(x(tip)+bandW/2,width-R)-bx} height={ih}
+            fill="rgba(37,99,235,.06)" style={{pointerEvents:"none"}}/>);})()}
+        {/* 마우스 감지 영역 — 달 단위 세로 띠.
+            좌우 끝과 달 이름 줄까지 덮는다. 그래프 안쪽까지만 자르면 맨 끝 달 동그라미의
+            바깥쪽 절반, 0명인 달 동그라미의 아래쪽 절반, 달 이름이 안 눌린다 (2026-10-02 검토) */}
         {labels.map((lb,i)=>{
-          const bx=Math.max(L,x(i)-bandW/2);
-          return(<rect key={"h"+i} x={bx} y={T} width={Math.min(x(i)+bandW/2,width-R)-bx} height={ih}
-            fill={tip===i?"rgba(37,99,235,.06)":"transparent"} style={{cursor:"crosshair"}}
-            onMouseEnter={()=>setTip(i)}/>);
+          const bx=Math.max(0,x(i)-bandW/2);
+          return(<rect key={"h"+i} x={bx} y={T} width={Math.min(x(i)+bandW/2,width)-bx} height={height-T}
+            fill="transparent"
+            style={{cursor:onMonthDbl?"pointer":"crosshair",userSelect:"none"}}
+            onMouseEnter={()=>setTip(i)}
+            onDoubleClick={onMonthDbl?()=>onMonthDbl(i):undefined}/>);
         })}
       </svg>
       {tip!=null&&(
@@ -1843,6 +1851,7 @@ function LineChartSvg({labels,series,height=230,width=620}){
             <i style={{display:"inline-block",width:8,height:8,borderRadius:2,marginRight:5,verticalAlign:-1,background:s.color}}/>
             {s.name} <b>{s.values[tip]}명</b>{s.rates&&s.rates[tip]&&s.rates[tip]!=="—"?` · ${s.rates[tip]}`:""}
           </div>))}
+          {onMonthDbl&&<div style={{marginTop:3,fontSize:11,color:"#aab2c8"}}>두 번 누르면 명단이 보입니다</div>}
         </div>
       )}
     </div>
@@ -1885,6 +1894,7 @@ function AdminDashboard({onBack}){
   // 완료/진행 중 카드 더블클릭 상세
   const [statusModal,setStatusModal]=useState(null); // {tab:"on"|"off", status:"완료"|"진행중"}
   const [kpiModal,setKpiModal]=useState(null); // 통계 '한눈에 보기' 더블클릭 상세: "join"|"leave"|"net"
+  const [monthModal,setMonthModal]=useState(null); // 월간 추이 그래프 더블클릭 상세: "2026-10" 같은 달
   // 통계 탭: 입퇴사율 계산 기준 인원 (kv_store에 저장)
   const [headcount,setHeadcount]=useState("");
   useEffect(()=>{load("stats_headcount",true).then(v=>{if(v!=null)setHeadcount(String(v));});},[]);
@@ -2309,8 +2319,9 @@ const filteredExt=allExtReqs.filter(r=>{
           </div>
           <div style={card}>
             <h3 style={h3}>월간 입·퇴사 추이</h3>
-            <div style={sub}>최근 12개월 — 그래프에 마우스를 올리면 그 달의 인원수와 비율이 보입니다</div>
+            <div style={sub}>최근 12개월 — 마우스를 올리면 그 달의 인원수와 비율이, <b>두 번 누르면 그 달의 명단</b>이 보입니다</div>
             <LineChartSvg labels={months.map(m=>m.slice(2))}
+              onMonthDbl={i=>setMonthModal(months[i])}
               series={[
                 {name:"입사",color:"#2563eb",values:joinM,rates:base>0?joinM.map(rate):null},
                 {name:"퇴사",color:"#e84c8b",values:leaveM,rates:base>0?leaveM.map(rate):null},
@@ -2567,6 +2578,51 @@ const filteredExt=allExtReqs.filter(r=>{
                           <td style={{padding:"9px 11px",textAlign:"center",color:"#4a5568"}}>{isOff?e.leaveDate:e.joinDate}</td>
                         </tr>))}
                       {rows.length===0&&<tr><td colSpan={5} style={{padding:20,textAlign:"center",color:"#66718c",fontSize:12.5}}>해당하는 인원이 없습니다.</td></tr>}
+                    </tbody>
+                  </table>
+                </div>
+              </div>))}
+          </div>
+        </Modal>
+      );
+    })()}
+
+    {/* ── 월간 추이 그래프 더블클릭 상세 (그 달의 명단) ── */}
+    {monthModal&&(()=>{
+      const ym=d=>String(d||"").slice(0,7);
+      const joins=employees.filter(e=>ym(e.joinDate)===monthModal)
+        .sort((a,b)=>String(a.joinDate).localeCompare(String(b.joinDate))||(a.name||"").localeCompare(b.name||"","ko"));
+      const leaves=offEmps.filter(e=>ym(e.leaveDate)===monthModal)
+        .sort((a,b)=>String(a.leaveDate).localeCompare(String(b.leaveDate))||(a.name||"").localeCompare(b.name||"","ko"));
+      const [연,월]=monthModal.split("-");
+      const sections=[["입사",joins,false],["퇴사",leaves,true]];
+      return(
+        <Modal title={`${연}년 ${parseInt(월,10)}월 — 입사 ${joins.length}명 · 퇴사 ${leaves.length}명`}
+          onClose={()=>setMonthModal(null)} width={620}>
+          <p style={{fontSize:12,color:"#66718c",margin:"0 0 10px"}}>행을 클릭하면 그 사람의 체크리스트 상세로 이동합니다.</p>
+          <div style={{maxHeight:400,overflowY:"auto"}}>
+            {sections.map(([label,rows,isOff])=>(
+              <div key={label} style={{marginBottom:12}}>
+                <div style={{fontWeight:800,fontSize:13,color:isOff?"#e84c8b":"#2563eb",margin:"4px 0 6px"}}>{label} {rows.length}명</div>
+                <div style={{border:"1.5px solid #eef1f8",borderRadius:12,overflow:"hidden"}}>
+                  <table style={{width:"100%",borderCollapse:"collapse",fontSize:13}}>
+                    <thead><tr style={{background:"#f8faff"}}>
+                      {["사번","성명","부서","직급",isOff?"퇴사일":"입사일"].map(h=>
+                        <th key={h} style={{padding:"9px 11px",textAlign:"center",fontSize:11,fontWeight:700,color:"#66718c",whiteSpace:"nowrap"}}>{h}</th>)}
+                    </tr></thead>
+                    <tbody>
+                      {rows.map(e=>(
+                        <tr key={e.id} onClick={()=>{setMonthModal(null);isOff?setSelectedOff(e):setSelected(e);}}
+                          style={{borderBottom:"1px solid #f0f4fa",cursor:"pointer"}}
+                          onMouseEnter={ev=>ev.currentTarget.style.background="#f8faff"}
+                          onMouseLeave={ev=>ev.currentTarget.style.background="transparent"}>
+                          <td style={{padding:"9px 11px",textAlign:"center",color:"#66718c",fontSize:12}}>{e.empId||"-"}</td>
+                          <td style={{padding:"9px 11px",textAlign:"center",fontWeight:700,color:"#151c2e"}}>{e.name}</td>
+                          <td style={{padding:"9px 11px",textAlign:"center",color:"#4a5568"}}>{e.department}</td>
+                          <td style={{padding:"9px 11px",textAlign:"center",color:"#4a5568"}}>{e.position}</td>
+                          <td style={{padding:"9px 11px",textAlign:"center",color:"#4a5568"}}>{isOff?e.leaveDate:e.joinDate}</td>
+                        </tr>))}
+                      {rows.length===0&&<tr><td colSpan={5} style={{padding:16,textAlign:"center",color:"#66718c",fontSize:12.5}}>이 달에는 없습니다.</td></tr>}
                     </tbody>
                   </table>
                 </div>
